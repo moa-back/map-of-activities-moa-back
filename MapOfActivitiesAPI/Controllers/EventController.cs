@@ -39,7 +39,7 @@ namespace MapOfActivitiesAPI.Controllers
             return confectioner;
         }
 
-        [HttpGet("filter")]
+        [HttpGet("{filter}")]
         public IEnumerable<Event> GetEventsByFilter(string filter)
         {
             var filterType = _context.Types.Where(x => x.Name == filter).Select(x=>x.Id).FirstOrDefault();
@@ -96,7 +96,7 @@ namespace MapOfActivitiesAPI.Controllers
         }
 
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteConfectioner(int id)
+        public async Task<IActionResult> DeleteEvent(int id)
         {
             if (_context.Events == null)
             {
