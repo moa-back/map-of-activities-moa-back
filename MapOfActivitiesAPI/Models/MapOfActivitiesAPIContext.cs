@@ -1,5 +1,4 @@
-﻿
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 
 namespace MapOfActivitiesAPI.Models
@@ -7,7 +6,10 @@ namespace MapOfActivitiesAPI.Models
     public class MapOfActivitiesAPIContext : DbContext
     {
         public DbSet<Event> Events { get; set; }
-        public DbSet<Event> Types { get; set; }
+        public DbSet<Type> Types { get; set; }
+        public DbSet<Visitings> Visitings { get; set; }
+        public DbSet<Comment> Comments { get; set; }
+        public DbSet<User> Users { get; set; }
 
         public MapOfActivitiesAPIContext(DbContextOptions options)
             : base(options)
