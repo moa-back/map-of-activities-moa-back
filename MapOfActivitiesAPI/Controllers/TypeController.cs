@@ -104,16 +104,18 @@ namespace MapOfActivitiesAPI.Controllers
             return NoContent();
         }
         [HttpPut("{id}")]
-        public IActionResult Put(int id, [FromBody] Type type)
+        public async Task<ActionResult<Type>> PutEvent(int id, Type type)
         {
             if (id != type.Id)
             {
-                return BadRequest("Type ID does not match");
+                return BadRequest("Type ID mismatch");
             }
+
+            _context.Entry(type).State = EntityState.Modified;
 
             try
             {
-                _context.SaveChanges();
+                await _context.SaveChangesAsync();
             }
             catch (DbUpdateConcurrencyException)
             {
@@ -127,7 +129,7 @@ namespace MapOfActivitiesAPI.Controllers
                 }
             }
 
-            return NoContent();
+            return type; 
         }
 
         [HttpDelete("{id}")]
