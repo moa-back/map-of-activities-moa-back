@@ -9,6 +9,11 @@ builder.Services.AddDbContext<MapOfActivitiesAPIContext>(options =>
 
 builder.Services.AddControllers();
 builder.Services.AddSwaggerGen();
+builder.Services.AddCors(c =>
+{
+    c.AddPolicy("AllowOrigin", options => options.AllowAnyOrigin().AllowAnyMethod().
+     AllowAnyHeader());
+});
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -19,13 +24,15 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
+
+app.UseCors("AllowOrigin");
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI(c =>
     {
         c.SwaggerEndpoint("/swagger/v1/swagger.json", "Map API V1");
-       // c.RoutePrefix = string.Empty; // розкоментуйте цю стрічку якщо хочете запускати swagger при запуску замість основної сторінки
+        c.RoutePrefix = string.Empty; // розкоментуйте цю стрічку якщо хочете запускати swagger при запуску замість основної сторінки
     });
 }
 
