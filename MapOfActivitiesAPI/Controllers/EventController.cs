@@ -1,4 +1,4 @@
-﻿using MapOfActivitiesAPI.DataModels;
+﻿
 using MapOfActivitiesAPI.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
