@@ -1,4 +1,5 @@
-﻿using MapOfActivitiesAPI.Models;
+﻿using MapOfActivitiesAPI.DataModels;
+using MapOfActivitiesAPI.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -39,19 +40,19 @@ namespace MapOfActivitiesAPI.Controllers
             return confectioner;
         }
 
-        [HttpGet("{filter}")]
-        public IEnumerable<Event> GetEventsByFilter(string filter)
-        {
-            var filterType = _context.Types.Where(x => x.Name == filter).Select(x=>x.Id).FirstOrDefault();
-            var points = _context.Events.AsQueryable();
+        //[HttpGet("{filter}")]
+        //public IEnumerable<Event> GetEventsByFilter(string filter)
+        //{
+        //    var filterType = _context.Types.Where(x => x.Name == filter).Select(x=>x.Id).FirstOrDefault();
+        //    var points = _context.Events.AsQueryable();
 
-            if (!string.IsNullOrEmpty(filter))
-            {
-                points = points.Where(p => p.TypeId == filterType);
-            }
+        //    if (!string.IsNullOrEmpty(filter))
+        //    {
+        //        points = points.Where(p => p.TypeId == filterType);
+        //    }
 
-            return (IEnumerable<Event>)points.ToList();
-        }
+        //    return (IEnumerable<Event>)points.ToList();
+        //}
 
         [HttpPut("{id}")]
         public async Task<IActionResult> PutEvent(int id, Event myEvent)
@@ -61,6 +62,7 @@ namespace MapOfActivitiesAPI.Controllers
                 return BadRequest();
             }
             else{ }
+            myEvent.Duration = TimeSpan.FromSeconds(0);
             _context.Entry(myEvent).State = EntityState.Modified;
 
             try
@@ -89,6 +91,8 @@ namespace MapOfActivitiesAPI.Controllers
             {
                 return Problem("Entity set 'MapOfActivitiesAPIContext.Events'  is null.");
             }
+
+            myEvent.Duration = TimeSpan.FromSeconds(0);
             _context.Events.Add(myEvent);
             await _context.SaveChangesAsync();
 
