@@ -1,4 +1,5 @@
-﻿using MapOfActivitiesAPI.Models;
+﻿
+using MapOfActivitiesAPI.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -58,8 +59,8 @@ namespace MapOfActivitiesAPI.Controllers
         [HttpGet("filter")]
         public IEnumerable<Event> GetEventsByFilter([FromQuery] string? searchName = null,
             [FromQuery] string? userPoint = null,
-            [FromQuery] double? distance = null, 
-            [FromQuery] List<int>? types = null, 
+            [FromQuery] double? distance = null,
+            [FromQuery] List<int>? types = null,
             [FromQuery] DateTime? startTime = null,
             [FromQuery] DateTime? endTime = null)
         {
@@ -91,12 +92,12 @@ namespace MapOfActivitiesAPI.Controllers
                 points = points.Where(p => p.Time <= endTime.Value);
             }
 
-            return (IEnumerable<Event>)points.ToList();
-        }
+                return (IEnumerable<Event>)points.ToList();
+            }
 
-        private double CalculateDistance(string coordinates1, string coordinates2)
-        {
-            
+            private double CalculateDistance(string coordinates1, string coordinates2)
+            {
+
                 var (lat1, lon1) = ParseCoordinates(coordinates1);
                 var (lat2, lon2) = ParseCoordinates(coordinates2);
 
@@ -117,90 +118,93 @@ namespace MapOfActivitiesAPI.Controllers
                 var c = 2 * Math.Atan2(Math.Sqrt(a), Math.Sqrt(1 - a));
                 var distance = EarthRadius * c;
                 return distance;
-           
-        }
-        private (double, double) ParseCoordinates(string coordinates)
-        {
-           
-            coordinates = coordinates.Trim().Replace(" ", "");
 
-            
-            var parts = coordinates.Split(',');
-
-            if (parts.Length == 2 &&
-                double.TryParse(parts[0], NumberStyles.Float, CultureInfo.InvariantCulture, out var lat) &&
-                double.TryParse(parts[1], NumberStyles.Float, CultureInfo.InvariantCulture, out var lon))
+            }
+            private (double, double) ParseCoordinates(string coordinates)
             {
-                return (lat, lon);
+
+                coordinates = coordinates.Trim().Replace(" ", "");
+
+
+                var parts = coordinates.Split(',');
+
+                if (parts.Length == 2 &&
+                    double.TryParse(parts[0], NumberStyles.Float, CultureInfo.InvariantCulture, out var lat) &&
+                    double.TryParse(parts[1], NumberStyles.Float, CultureInfo.InvariantCulture, out var lon))
+                {
+                    return (lat, lon);
+                }
+
+                throw new ArgumentException("Invalid coordinates format");
             }
 
-            throw new ArgumentException("Invalid coordinates format");
-        }
 
-
-        private double DegreeToRadian(double degree)
-        {
-            return degree * Math.PI / 180.0;
-        }
-
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutEvent(int id, Event myEvent)
-        {
-            if (id != myEvent.Id)
+            private double DegreeToRadian(double degree)
             {
-                return BadRequest();
+                return degree * Math.PI / 180.0;
             }
-            else{ }
-            _context.Entry(myEvent).State = EntityState.Modified;
 
-            try
+            [HttpPut("{id}")]
+            public async Task<IActionResult> PutEvent(int id, Event myEvent)
             {
+                if (id != myEvent.Id)
+                {
+                    return BadRequest();
+                }
+                else { }
+                
+                _context.Entry(myEvent).State = EntityState.Modified;
+
+                try
+                {
+                    await _context.SaveChangesAsync();
+                }
+                catch (DbUpdateConcurrencyException)
+                {
+                    if ((_context.Events?.Any(e => e.Id == id)).GetValueOrDefault())
+                    {
+                        return NotFound();
+                    }
+                    else
+                    {
+                        throw;
+                    }
+                }
+
+                return NoContent();
+            }
+
+            [HttpPost]
+            public async Task<ActionResult<Event>> PostEvent(Event myEvent)
+            {
+                if (_context.Events == null)
+                {
+                    return Problem("Entity set 'MapOfActivitiesAPIContext.Events'  is null.");
+                }
+
+                
+                _context.Events.Add(myEvent);
                 await _context.SaveChangesAsync();
+
+                return NoContent();
             }
-            catch (DbUpdateConcurrencyException)
+
+            [HttpDelete("{id}")]
+            public async Task<IActionResult> DeleteEvent(int id)
             {
-                if ((_context.Events?.Any(e => e.Id == id)).GetValueOrDefault())
+                if (_context.Events == null)
                 {
                     return NotFound();
                 }
-                else
+                var myEvent = await _context.Events.FindAsync(id);
+                if (myEvent == null)
                 {
-                    throw;
+                    return NotFound();
                 }
+                _context.Events.Remove(myEvent);
+                await _context.SaveChangesAsync();
+
+                return NoContent();
             }
-
-            return NoContent();
-        }
-
-        [HttpPost]
-        public async Task<ActionResult<Event>> PostEvent(Event myEvent)
-        {
-            if (_context.Events == null)
-            {
-                return Problem("Entity set 'MapOfActivitiesAPIContext.Events'  is null.");
-            }
-            _context.Events.Add(myEvent);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
-        }
-
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteEvent(int id)
-        {
-            if (_context.Events == null)
-            {
-                return NotFound();
-            }
-            var myEvent = await _context.Events.FindAsync(id);
-            if (myEvent == null)
-            {
-                return NotFound();
-            }
-            _context.Events.Remove(myEvent);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
         }
     }
-}
