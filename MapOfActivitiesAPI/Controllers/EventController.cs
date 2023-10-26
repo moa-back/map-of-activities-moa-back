@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Drawing;
+using System.Globalization;
 
 namespace MapOfActivitiesAPI.Controllers
 {
@@ -39,18 +40,107 @@ namespace MapOfActivitiesAPI.Controllers
             return confectioner;
         }
 
-        [HttpGet("{filter}")]
-        public IEnumerable<Event> GetEventsByFilter(string filter)
+        //[HttpGet("{filter}")]
+        //public IEnumerable<Event> GetEventsByFilter(string filter)
+        //{
+        //    var filterType = _context.Types.Where(x => x.Name == filter).Select(x=>x.Id).FirstOrDefault();
+        //    var points = _context.Events.AsQueryable();
+
+        //    if (!string.IsNullOrEmpty(filter))
+        //    {
+        //        points = points.Where(p => p.TypeId == filterType);
+        //    }
+
+        //    return (IEnumerable<Event>)points.ToList();
+        //}
+
+
+        [HttpGet("filter")]
+        public IEnumerable<Event> GetEventsByFilter([FromQuery] string? searchName = null,
+            [FromQuery] string? userPoint = null,
+            [FromQuery] double? distance = null, 
+            [FromQuery] List<int>? types = null, 
+            [FromQuery] DateTime? startTime = null,
+            [FromQuery] DateTime? endTime = null)
         {
-            var filterType = _context.Types.Where(x => x.Name == filter).Select(x=>x.Id).FirstOrDefault();
             var points = _context.Events.AsQueryable();
 
-            if (!string.IsNullOrEmpty(filter))
+            if (!string.IsNullOrEmpty(searchName))
             {
-                points = points.Where(p => p.TypeId == filterType);
+                points = points.Where(p => p.Name.Contains(searchName));
+            }
+
+            if (!string.IsNullOrEmpty(userPoint) && distance.HasValue)
+            {
+                var allPoints = points.ToList();
+                points = allPoints.Where(p => CalculateDistance(p.Coordinates, userPoint) <= distance.Value).AsQueryable();
+            }
+
+            if (types != null && types.Count > 0)
+            {
+                points = points.Where(p => types.Contains(p.TypeId));
+            }
+
+            if (startTime.HasValue)
+            {
+                points = points.Where(p => p.Time >= startTime.Value);
+            }
+
+            if (endTime.HasValue)
+            {
+                points = points.Where(p => p.Time <= endTime.Value);
             }
 
             return (IEnumerable<Event>)points.ToList();
+        }
+
+        private double CalculateDistance(string coordinates1, string coordinates2)
+        {
+            
+                var (lat1, lon1) = ParseCoordinates(coordinates1);
+                var (lat2, lon2) = ParseCoordinates(coordinates2);
+
+                const double EarthRadius = 6371000;
+
+
+                var lat1Rad = DegreeToRadian(lat1);
+                var lon1Rad = DegreeToRadian(lon1);
+                var lat2Rad = DegreeToRadian(lat2);
+                var lon2Rad = DegreeToRadian(lon2);
+
+
+                var dLat = lat2Rad - lat1Rad;
+                var dLon = lon2Rad - lon1Rad;
+                var a = Math.Sin(dLat / 2) * Math.Sin(dLat / 2) +
+                        Math.Cos(lat1Rad) * Math.Cos(lat2Rad) *
+                        Math.Sin(dLon / 2) * Math.Sin(dLon / 2);
+                var c = 2 * Math.Atan2(Math.Sqrt(a), Math.Sqrt(1 - a));
+                var distance = EarthRadius * c;
+                return distance;
+           
+        }
+        private (double, double) ParseCoordinates(string coordinates)
+        {
+           
+            coordinates = coordinates.Trim().Replace(" ", "");
+
+            
+            var parts = coordinates.Split(',');
+
+            if (parts.Length == 2 &&
+                double.TryParse(parts[0], NumberStyles.Float, CultureInfo.InvariantCulture, out var lat) &&
+                double.TryParse(parts[1], NumberStyles.Float, CultureInfo.InvariantCulture, out var lon))
+            {
+                return (lat, lon);
+            }
+
+            throw new ArgumentException("Invalid coordinates format");
+        }
+
+
+        private double DegreeToRadian(double degree)
+        {
+            return degree * Math.PI / 180.0;
         }
 
         [HttpPut("{id}")]
