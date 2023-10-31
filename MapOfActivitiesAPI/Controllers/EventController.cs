@@ -31,7 +31,7 @@ namespace MapOfActivitiesAPI.Controllers
             {
                 return NotFound();
             }
-            var confectioner = await _context.Events.FindAsync(id);
+            var confectioner = _context.Events.Include(x => x.Type).Where(x => x.Id == id).FirstOrDefault();
 
             if (confectioner == null)
             {
