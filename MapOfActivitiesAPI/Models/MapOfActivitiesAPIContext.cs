@@ -11,7 +11,7 @@ namespace MapOfActivitiesAPI.Models
         public DbSet<Comment> Comments { get; set; }
         public DbSet<User> Users { get; set; }
 
-        public MapOfActivitiesAPIContext(DbContextOptions options)
+        public MapOfActivitiesAPIContext(DbContextOptions<MapOfActivitiesAPIContext> options)
             : base(options)
         {
         }

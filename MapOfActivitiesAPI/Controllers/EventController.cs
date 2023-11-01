@@ -1,8 +1,9 @@
-﻿
-using MapOfActivitiesAPI.Models;
+﻿using MapOfActivitiesAPI.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Data;
 using System.Drawing;
 using System.Globalization;
 
@@ -17,7 +18,7 @@ namespace MapOfActivitiesAPI.Controllers
         {
             _context = context;
         }
-
+     //   [Authorize(Roles = ApplicationUserRoles.User)]
         [HttpGet]
         public IEnumerable<Event> Get()
         {
