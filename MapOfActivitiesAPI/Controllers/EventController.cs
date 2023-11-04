@@ -69,7 +69,7 @@ namespace MapOfActivitiesAPI.Controllers
 
             if (!string.IsNullOrEmpty(searchName))
             {
-                points = points.Where(p => p.Name.Contains(searchName));
+                points = points.AsEnumerable().Where(p => p.Name.ToLower().Contains(searchName.ToLower())).AsQueryable();
             }
 
             if (!string.IsNullOrEmpty(userPoint) && distance.HasValue)
