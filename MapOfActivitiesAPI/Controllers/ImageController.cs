@@ -14,7 +14,7 @@ namespace MapOfActivitiesAPI.Controllers
             _fileStorage = fileStorage;
         }
      
-        [HttpGet("api/image/{fileName}")]
+        [HttpGet("{fileName}")]
         public async Task<ActionResult> Image(string fileName)
         {
             try
