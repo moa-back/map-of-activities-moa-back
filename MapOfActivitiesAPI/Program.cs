@@ -7,6 +7,7 @@ using Swashbuckle.AspNetCore.SwaggerUI;
 using System.Text;
 using MapOfActivitiesAPI.Services;
 using System.Text.Json.Serialization;
+using MapOfActivitiesAPI.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -30,6 +31,8 @@ builder.Services.AddDbContext<ApplicationIdentityDbContext>(option => option.Use
 
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>().AddEntityFrameworkStores<ApplicationIdentityDbContext>()
     .AddDefaultTokenProviders();
+
+builder.Services.AddSingleton<IFileStorage, ServerStorage>();
 
 builder.Services.AddAuthentication(options =>
 {

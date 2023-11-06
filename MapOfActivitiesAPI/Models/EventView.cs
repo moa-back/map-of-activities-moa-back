@@ -1,7 +1,6 @@
 ﻿namespace MapOfActivitiesAPI.Models
 {
-
-    public class Event
+    public class EventView
     {
         public int Id { get; set; }
         public string Name { get; set; }
@@ -12,6 +11,6 @@
         public DateTime? EndTime { get; set; }
         public string Description { get; set; }
         public string Coordinates { get; set; }
-        public string? ImageName { get; set; }
+        public string DataUrl { get; set; }
     }
 }

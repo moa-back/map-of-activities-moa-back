@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
+using MapOfActivitiesAPI.Models;
 
 namespace MapOfActivitiesAPI.Models
 {
@@ -28,5 +29,7 @@ namespace MapOfActivitiesAPI.Models
                 .OnDelete(DeleteBehavior.Cascade);
             });
         }
+
+        public DbSet<MapOfActivitiesAPI.Models.EventView>? EventView { get; set; }
     }
 }

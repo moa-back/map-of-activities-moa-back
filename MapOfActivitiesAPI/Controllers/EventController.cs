@@ -1,4 +1,5 @@
-﻿using MapOfActivitiesAPI.Models;
+﻿using MapOfActivitiesAPI.Interfaces;
+using MapOfActivitiesAPI.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -13,9 +14,11 @@ namespace MapOfActivitiesAPI.Controllers
     [ApiController]
     public class EventController : ControllerBase
     {
+        private readonly IFileStorage _fileStorage;
         private MapOfActivitiesAPIContext _context;
-        public EventController(MapOfActivitiesAPIContext context)
+        public EventController(IFileStorage fileStorage, MapOfActivitiesAPIContext context)
         {
+            _fileStorage = fileStorage;
             _context = context;
         }
      //   [Authorize(Roles = ApplicationUserRoles.User)]
@@ -176,21 +179,35 @@ namespace MapOfActivitiesAPI.Controllers
             }
 
             [HttpPost]
-            public async Task<ActionResult<Event>> PostEvent(Event myEvent)
+            public async Task<ActionResult<Event>> PostEvent(EventView viewEvent)
             {
                 if (_context.Events == null)
                 {
                     return Problem("Entity set 'MapOfActivitiesAPIContext.Events'  is null.");
                 }
+             
+                Event myEvent = new Event();
+                myEvent.ImageName = await _fileStorage.Upload(viewEvent.DataUrl);
+                myEvent.Name = viewEvent.Name;
+                myEvent.TypeId = viewEvent.TypeId;
+                myEvent.StartTime = viewEvent.StartTime;
+                myEvent.EndTime = viewEvent.EndTime;
+                myEvent.Description = viewEvent.Description;
+                myEvent.Coordinates = viewEvent.Coordinates;
 
-                
                 _context.Events.Add(myEvent);
                 await _context.SaveChangesAsync();
 
                 return NoContent();
             }
 
-            [HttpDelete("{id}")]
+        //[HttpGet("{fileName}")]
+        //public async Task<ActionResult<string>> GetImage(string fileName)
+        //{
+        //    return await _fileStorage.Get(fileName); 
+        //}
+
+        [HttpDelete("{id}")]
             public async Task<IActionResult> DeleteEvent(int id)
             {
                 if (_context.Events == null)
