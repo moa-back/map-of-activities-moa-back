@@ -93,7 +93,7 @@ namespace MapOfActivitiesAPI.Controllers
                 points = points.Where(p => p.Time <= endTime.Value);
             }
 
-                return (IEnumerable<Event>)points.ToList();
+                return (IEnumerable<Event>)points.Include(x => x.Type).ToList();
             }
 
             private double CalculateDistance(string coordinates1, string coordinates2)
