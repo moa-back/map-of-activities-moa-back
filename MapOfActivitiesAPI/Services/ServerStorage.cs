@@ -18,6 +18,11 @@ namespace MapOfActivitiesAPI.Services
         {
             string fileName = string.Empty;
 
+            if(image == "")
+            {
+                return null;
+            }
+
             try
             {
                 // Витягуємо дані з base64 рядка
