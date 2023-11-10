@@ -50,18 +50,6 @@ namespace MapOfActivitiesAPI.Services
             return fileName;
         }
 
-        //public async Task<string> Get(string fileName)
-        //{
-        //    try
-        //    {
-        //        return url + fileName;
-        //    }
-        //    catch (Exception e)
-        //    {
-        //        throw new Exception("ouch");
-        //    }
-
-        //}
         public async Task<FileStreamResult> GetImage(string id)
         {
             var filePath = Path.Combine(_webhost.WebRootPath + folder, id);
@@ -80,6 +68,20 @@ namespace MapOfActivitiesAPI.Services
             memoryStream.Position = 0; // Скидуємо позицію для читання
 
             return new FileStreamResult(memoryStream, "image/jpeg");
+        }
+
+        public async Task<bool> Delete(string fileName)
+        {
+            if (fileName == "") return false;
+            try
+            {
+                System.IO.File.Delete(_webhost.WebRootPath + folder + fileName);
+            }
+            catch
+            {
+                throw new Exception();
+            }
+            return true;
         }
     }
 }

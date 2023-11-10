@@ -148,37 +148,79 @@ namespace MapOfActivitiesAPI.Controllers
                 return degree * Math.PI / 180.0;
             }
 
-            [HttpPut("{id}")]
-            public async Task<IActionResult> PutEvent(int id, Event myEvent)
+        //[HttpPut("{id}")]
+        //public async Task<IActionResult> PutEvent(int id, Event myEvent)
+        //{
+        //    if (id != myEvent.Id)
+        //    {
+        //        return BadRequest();
+        //    }
+        //    else { }
+
+        //    _context.Entry(myEvent).State = EntityState.Modified;
+
+        //    try
+        //    {
+        //        await _context.SaveChangesAsync();
+        //    }
+        //    catch (DbUpdateConcurrencyException)
+        //    {
+        //        if ((_context.Events?.Any(e => e.Id == id)).GetValueOrDefault())
+        //        {
+        //            return NotFound();
+        //        }
+        //        else
+        //        {
+        //            throw;
+        //        }
+        //    }
+
+        //    return NoContent();
+        //}
+
+        [HttpPut("{id}")]
+        public async Task<IActionResult> PutEvent(int id, EventView viewEvent)
+        {
+            if (id != viewEvent.Id)
             {
-                if (id != myEvent.Id)
-                {
-                    return BadRequest();
-                }
-                else { }
-                
-                _context.Entry(myEvent).State = EntityState.Modified;
+                return BadRequest();
+            }
+            else { }
 
-                try
-                {
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if ((_context.Events?.Any(e => e.Id == id)).GetValueOrDefault())
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
+            var myEvent = await _context.Events.FindAsync(id);
+            if(viewEvent.DataUrl != "")
+            {
+                _fileStorage.Delete(myEvent.ImageName);
+                myEvent.ImageName = await _fileStorage.Upload(viewEvent.DataUrl);
+            }
+            myEvent.Name = viewEvent.Name;
+            myEvent.TypeId = viewEvent.TypeId;
+            myEvent.StartTime = viewEvent.StartTime;
+            myEvent.EndTime = viewEvent.EndTime;
+            myEvent.Description = viewEvent.Description;
+            myEvent.Coordinates = viewEvent.Coordinates;
+            _context.Entry(myEvent).State = EntityState.Modified;
 
-                return NoContent();
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if ((_context.Events?.Any(e => e.Id == id)).GetValueOrDefault())
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    throw;
+                }
             }
 
-            [HttpPost]
+            return NoContent();
+        }
+
+        [HttpPost]
             public async Task<ActionResult<Event>> PostEvent(EventView viewEvent)
             {
                 if (_context.Events == null)
@@ -219,6 +261,7 @@ namespace MapOfActivitiesAPI.Controllers
                 {
                     return NotFound();
                 }
+                _fileStorage.Delete(myEvent.ImageName);
                 _context.Events.Remove(myEvent);
                 await _context.SaveChangesAsync();
 
