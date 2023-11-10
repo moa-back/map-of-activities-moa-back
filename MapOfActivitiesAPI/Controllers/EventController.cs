@@ -68,7 +68,7 @@ namespace MapOfActivitiesAPI.Controllers
             [FromQuery] DateTime? startTime = null,
             [FromQuery] DateTime? endTime = null)
         {
-            var points = _context.Events.AsQueryable();
+            var points = _context.Events.Include(x => x.Type).AsQueryable();
 
             if (!string.IsNullOrEmpty(searchName))
             {
@@ -96,7 +96,7 @@ namespace MapOfActivitiesAPI.Controllers
                 points = points.Where(p => p.EndTime <= endTime.Value);
             }
 
-                return (IEnumerable<Event>)points.Include(x => x.Type).ToList();
+                return (IEnumerable<Event>)points.ToList();
             }
 
             private double CalculateDistance(string coordinates1, string coordinates2)
