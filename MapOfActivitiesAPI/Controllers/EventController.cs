@@ -86,14 +86,14 @@ namespace MapOfActivitiesAPI.Controllers
                 points = points.Where(p => types.Contains(p.TypeId));
             }
 
-            if (startTime.HasValue)
-            {
-                points = points.Where(p => p.StartTime >= startTime.Value);
-            }
-
             if (endTime.HasValue)
             {
-                points = points.Where(p => p.EndTime <= endTime.Value);
+                points = points.Where(p => p.StartTime <= endTime.Value);
+            }
+
+            if (startTime.HasValue)
+            {
+                points = points.Where(p => p.EndTime >= startTime.Value);
             }
 
                 return (IEnumerable<Event>)points.ToList();
