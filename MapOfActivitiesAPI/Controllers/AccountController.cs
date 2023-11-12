@@ -69,7 +69,8 @@ namespace MapOfActivitiesAPI.Controllers
                 {
                     Token = new JwtSecurityTokenHandler().WriteToken(token),
                     RefreshToken = refreshToken,
-                    Expiration = token.ValidTo
+                    Expiration = token.ValidTo,
+                    UserId = user.Id
                 });
             }
             return BadRequest("Invalid email or password");
