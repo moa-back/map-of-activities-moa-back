@@ -5,7 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using MapOfActivitiesAPI.Models;
 
-[Authorize]
+
 [Route("api/[controller]")]
 [ApiController]
 public class UserProfileController : ControllerBase
@@ -16,11 +16,10 @@ public class UserProfileController : ControllerBase
     {
         _context = context;
     }
-
     [HttpGet("{userId}")]
-    public async Task<ActionResult<User>> GetUserProfile(int userId)
+    public async Task<ActionResult<User>> GetUserProfile(string userId)
     {
-        var user = await _context.Users.FindAsync(userId);
+        var user = await _context.Users.FirstOrDefaultAsync(u => u.UserId == userId);
 
         if (user == null)
         {
@@ -31,9 +30,9 @@ public class UserProfileController : ControllerBase
     }
 
     [HttpPut("{userId}")]
-    public async Task<IActionResult> UpdateUserProfile(int userId, User user)
+    public async Task<IActionResult> UpdateUserProfile(string userId, User user)
     {
-        if (userId != user.Id)
+        if (!string.Equals(userId, user.UserId))
         {
             return BadRequest();
         }
@@ -60,7 +59,7 @@ public class UserProfileController : ControllerBase
     }
 
     [HttpDelete("{userId}")]
-    public async Task<IActionResult> DeleteUserProfile(int userId)
+    public async Task<IActionResult> DeleteUserProfile(string userId)
     {
         var user = await _context.Users.FindAsync(userId);
         if (user == null)
@@ -74,8 +73,23 @@ public class UserProfileController : ControllerBase
         return NoContent();
     }
 
-    private bool UserExists(int userId)
+    [HttpPost]
+    public async Task<ActionResult<User>> CreateUserProfile(User user)
     {
-        return _context.Users.Any(e => e.Id == userId);
+        _context.Users.Add(user);
+        await _context.SaveChangesAsync();
+
+        return CreatedAtAction(nameof(GetUserProfile), new { userId = user.UserId }, user);
+    }
+
+    [HttpGet]
+    public async Task<ActionResult<IEnumerable<User>>> GetAllUserProfiles()
+    {
+        return await _context.Users.ToListAsync();
+    }
+
+    private bool UserExists(string userId)
+    {
+        return _context.Users.Any(e => e.UserId == userId);
     }
 }
