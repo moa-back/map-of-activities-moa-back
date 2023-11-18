@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.EntityFrameworkCore;
+using MapOfActivitiesAPI.Interfaces;
 
 [Route("api/[controller]")]
 [ApiController]
@@ -14,9 +15,11 @@ public class UsersController : ControllerBase
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly RoleManager<IdentityRole> _roleManager;
     private readonly MapOfActivitiesAPIContext _context;
+    private readonly IFileStorage _fileStorage;
 
-    public UsersController(UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager, MapOfActivitiesAPIContext context)
+    public UsersController(IFileStorage fileStorage, UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager, MapOfActivitiesAPIContext context)
     {
+        _fileStorage = fileStorage;
         _userManager = userManager;
         _roleManager = roleManager;
         _context = context;
@@ -145,8 +148,25 @@ public class UsersController : ControllerBase
         {
             return BadRequest();
         }
+        var currentUser = await _context.Users.Where(b => b.UserId == userId).FirstAsync();
+        
+        if (user.ImageURL != "")
+        {
+            if (currentUser.ImageURL != null) 
+            {
+                _fileStorage.Delete(currentUser.ImageURL);
+                currentUser.ImageURL = null;
+            }
+            if (user.ImageURL != "The picture has been deleted")
+            {
+                currentUser.ImageURL = await _fileStorage.Upload(user.ImageURL);
+            }
+        } 
 
-        _context.Entry(user).State = EntityState.Modified;
+        currentUser.Name = user.Name;
+        currentUser.Description = user.Description;
+
+        _context.Entry(currentUser).State = EntityState.Modified;
 
         try
         {
