@@ -12,11 +12,11 @@ namespace MapOfActivitiesAPI.Controllers
     [AllowAnonymous]
     [Route("api/[controller]")]
     [ApiController]
-    public class TokenController : ControllerBase
+    public class TokensController : ControllerBase
     {
         private readonly ITokenService _tokenService;
         private readonly UserManager<ApplicationUser> _userManager;
-        public TokenController(ITokenService tokenService, UserManager<ApplicationUser> userManager)
+        public TokensController(ITokenService tokenService, UserManager<ApplicationUser> userManager)
         {
             _tokenService = tokenService;
             _userManager = userManager;

@@ -10,11 +10,11 @@ namespace MapOfActivitiesAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class TypeController : ControllerBase
+    public class TypesController : ControllerBase
     {
         private MapOfActivitiesAPIContext _context;
 
-        public TypeController(MapOfActivitiesAPIContext context)
+        public TypesController(MapOfActivitiesAPIContext context)
         {
             _context = context;
         }

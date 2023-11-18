@@ -5,11 +5,11 @@ namespace MapOfActivitiesAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class ImageController : ControllerBase
+    public class ImagesController : ControllerBase
     {
         private readonly IFileStorage _fileStorage;
 
-        public ImageController(IFileStorage fileStorage)
+        public ImagesController(IFileStorage fileStorage)
         {
             _fileStorage = fileStorage;
         }
