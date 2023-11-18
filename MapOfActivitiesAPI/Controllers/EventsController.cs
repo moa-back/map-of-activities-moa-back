@@ -12,11 +12,11 @@ namespace MapOfActivitiesAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class EventController : ControllerBase
+    public class EventsController : ControllerBase
     {
         private readonly IFileStorage _fileStorage;
         private MapOfActivitiesAPIContext _context;
-        public EventController(IFileStorage fileStorage, MapOfActivitiesAPIContext context)
+        public EventsController(IFileStorage fileStorage, MapOfActivitiesAPIContext context)
         {
             _fileStorage = fileStorage;
             _context = context;

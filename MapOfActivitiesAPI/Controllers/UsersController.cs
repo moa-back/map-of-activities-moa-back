@@ -9,13 +9,13 @@ using Microsoft.EntityFrameworkCore;
 
 [Route("api/[controller]")]
 [ApiController]
-public class UserController : ControllerBase
+public class UsersController : ControllerBase
 {
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly RoleManager<IdentityRole> _roleManager;
     private readonly MapOfActivitiesAPIContext _context;
 
-    public UserController(UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager, MapOfActivitiesAPIContext context)
+    public UsersController(UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager, MapOfActivitiesAPIContext context)
     {
         _userManager = userManager;
         _roleManager = roleManager;
@@ -23,7 +23,7 @@ public class UserController : ControllerBase
     }
 
     [HttpGet]
-    [Route("get-users-with-roles")]
+    [Route("with-roles")]
     public async Task<IActionResult> GetUsersWithRoles()
     {
         var users = await _userManager.Users.ToListAsync();
@@ -46,7 +46,7 @@ public class UserController : ControllerBase
     }
 
     [HttpGet]
-    [Route("get-user/{userId}")]
+    [Route("{userId}")]
     public async Task<IActionResult> GetUser(string userId)
     {
         var user = await _userManager.FindByIdAsync(userId);
@@ -68,8 +68,8 @@ public class UserController : ControllerBase
     }
 
     [HttpPost]
-    [Route("add-banned/{userId}")]
-    public async Task<IActionResult> AddBanned(string userId)
+    [Route("ban/{userId}")]
+    public async Task<IActionResult> Ban(string userId)
     {
         var user = await _userManager.FindByIdAsync(userId);
 
@@ -95,7 +95,7 @@ public class UserController : ControllerBase
     }
 
     [HttpDelete]
-    [Route("delete-user-and-profile/{userId}")]
+    [Route("{userId}")]
     public async Task<IActionResult> DeleteUser(string userId)
     {
         var user = await _userManager.FindByIdAsync(userId);
@@ -124,7 +124,7 @@ public class UserController : ControllerBase
     }
 
     [HttpGet]
-    [Route("get-user-profile/{userId}")]
+    [Route("profiles/{userId}")]
     public async Task<ActionResult<User>> GetUserProfile(string userId)
     {
         var user = await _context.Users.FirstOrDefaultAsync(u => u.UserId == userId);
@@ -138,7 +138,7 @@ public class UserController : ControllerBase
     }
 
     [HttpPut]
-    [Route("update-user-profile/{userId}")]
+    [Route("profiles/{userId}")]
     public async Task<IActionResult> UpdateUserProfile(string userId, User user)
     {
         if (!string.Equals(userId, user.UserId))
@@ -167,18 +167,18 @@ public class UserController : ControllerBase
         return NoContent();
     }
 
-    [HttpPost]
-    [Route("create-user-profile")]
-    public async Task<ActionResult<User>> CreateUserProfile(User user)
-    {
-        _context.Users.Add(user);
-        await _context.SaveChangesAsync();
+    //[HttpPost]
+    //[Route("profiles")]
+    //public async Task<ActionResult<User>> CreateUserProfile(User user)
+    //{
+    //    _context.Users.Add(user);
+    //    await _context.SaveChangesAsync();
 
-        return CreatedAtAction(nameof(GetUserProfile), new { userId = user.UserId }, user);
-    }
+    //    return CreatedAtAction(nameof(GetUserProfile), new { userId = user.UserId }, user);
+    //}
 
     [HttpGet]
-    [Route("get-roles")]
+    [Route("roles")]
     public IActionResult GetRoles()
     {
         var roles = _roleManager.Roles.Select(r => r.Name).ToList();
@@ -186,7 +186,7 @@ public class UserController : ControllerBase
     }
 
     [HttpGet]
-    [Route("get-all-profiles")]
+    [Route("profiles")]
     public async Task<ActionResult<IEnumerable<User>>> GetAllUserProfiles()
     {
         return await _context.Users.ToListAsync();
