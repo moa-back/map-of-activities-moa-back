@@ -10,7 +10,7 @@ using Type = MapOfActivitiesAPI.Models.Type;
 
 namespace MapOfActivitiesAPI.Controllers
 {
-    [Authorize(Roles = ApplicationUserRoles.Admin)]
+
     [Route("api/[controller]")]
     [ApiController]
     public class TypesController : ControllerBase
@@ -55,6 +55,7 @@ namespace MapOfActivitiesAPI.Controllers
             return rootTypes;
         }
 
+        [Authorize(Roles = ApplicationUserRoles.Admin)]
         private void AddChildren(Type parentType, List<Type> allTypes)
         {
             parentType.Children = allTypes.Where(t => t.ParentTypeId == parentType.Id).ToList();
@@ -65,6 +66,8 @@ namespace MapOfActivitiesAPI.Controllers
             }
         }
 
+
+        [Authorize(Roles = ApplicationUserRoles.Admin)]
         [HttpPost]
         public ActionResult<Type> Post([FromBody] Type type)
         {
@@ -79,6 +82,7 @@ namespace MapOfActivitiesAPI.Controllers
             return CreatedAtAction("Get", new { id = type.Id }, type);
         }
         [HttpPost("CreateType")]
+        [Authorize(Roles = ApplicationUserRoles.Admin)]
         public ActionResult<Type> CreateType(string name, int parentTypeId)
         {
             var type = new Type { Name = name, ParentTypeId = parentTypeId };
@@ -89,6 +93,7 @@ namespace MapOfActivitiesAPI.Controllers
         }
 
         [HttpPut("EditType")]
+        [Authorize(Roles = ApplicationUserRoles.Admin)]
         public IActionResult EditType(int id, string name, string imageURL)
         {
             var type = _context.Types.Find(id);
@@ -107,6 +112,7 @@ namespace MapOfActivitiesAPI.Controllers
             return NoContent();
         }
         [HttpPut("{id}")]
+        [Authorize(Roles = ApplicationUserRoles.Admin)]
         public async Task<ActionResult<Type>> PutEvent(int id, Type type)
         {
             if (id != type.Id)
@@ -136,6 +142,7 @@ namespace MapOfActivitiesAPI.Controllers
         }
 
         [HttpDelete("{id}")]
+        [Authorize(Roles = ApplicationUserRoles.Admin)]
         public IActionResult Delete(int id)
         {
             var type = _context.Types.Find(id);
