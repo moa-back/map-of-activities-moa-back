@@ -101,16 +101,10 @@ namespace MapOfActivitiesAPI.Controllers
             };
             var result = await _userManager.CreateAsync(user, model.Password);
 
-            if (!await _roleManager.RoleExistsAsync(ApplicationUserRoles.User))
-                await _roleManager.CreateAsync(new IdentityRole(ApplicationUserRoles.User));
-
-            if (await _roleManager.RoleExistsAsync(ApplicationUserRoles.User))
-            {
-                await _userManager.AddToRoleAsync(user, ApplicationUserRoles.User);
-            }
             if (!result.Succeeded)
                 return StatusCode(StatusCodes.Status500InternalServerError, new ResponseModel { Status = "Error", Message = "User creation failed! Please check user details and try again." });
-            else {
+            else
+            {
                 _context.Users.Add(userProfile);
                 await _context.SaveChangesAsync();
 
@@ -122,6 +116,7 @@ namespace MapOfActivitiesAPI.Controllers
 
             return Ok(new ResponseModel { Status = "Success", Message = "User created successfully!" });
         }
+
 
         [HttpPost]
         [Route("register-admin")]
@@ -180,6 +175,14 @@ namespace MapOfActivitiesAPI.Controllers
             var result = await _userManager.ConfirmEmailAsync(user, code);
             if (result.Succeeded)
             {
+                if (!await _roleManager.RoleExistsAsync(ApplicationUserRoles.User))
+                    await _roleManager.CreateAsync(new IdentityRole(ApplicationUserRoles.User));
+
+                if (await _roleManager.RoleExistsAsync(ApplicationUserRoles.User))
+                {
+                    await _userManager.AddToRoleAsync(user, ApplicationUserRoles.User);
+                }
+
                 return Ok();
             }
             else

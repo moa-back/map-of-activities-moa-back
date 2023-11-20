@@ -8,6 +8,7 @@ using System.Linq;
 using Microsoft.EntityFrameworkCore;
 using MapOfActivitiesAPI.Interfaces;
 
+[Authorize(Roles = ApplicationUserRoles.Admin)]
 [Route("api/[controller]")]
 [ApiController]
 public class UsersController : ControllerBase

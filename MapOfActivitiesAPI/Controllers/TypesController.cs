@@ -1,13 +1,16 @@
 ﻿using MapOfActivitiesAPI.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using Type = MapOfActivitiesAPI.Models.Type;
 
 namespace MapOfActivitiesAPI.Controllers
 {
+    [Authorize(Roles = ApplicationUserRoles.Admin)]
     [Route("api/[controller]")]
     [ApiController]
     public class TypesController : ControllerBase
