@@ -20,13 +20,15 @@ namespace MapOfActivitiesAPI.Controllers
         private readonly IConfiguration _configuration;
         private readonly ITokenService _tokenService;
         private readonly RoleManager<IdentityRole> _roleManager;
+        private readonly MapOfActivitiesAPIContext _context;
 
-        public AccountController(UserManager<ApplicationUser> userManager, IConfiguration configuration, RoleManager<IdentityRole> roleManager, ITokenService tokenService)
+        public AccountController(UserManager<ApplicationUser> userManager, IConfiguration configuration, RoleManager<IdentityRole> roleManager, ITokenService tokenService, MapOfActivitiesAPIContext context)
         {
             _userManager = userManager;
             _configuration = configuration;
             _tokenService = tokenService;
             _roleManager = roleManager;
+            _context = context;
         }
         [AllowAnonymous]
         [HttpPost]
@@ -90,6 +92,13 @@ namespace MapOfActivitiesAPI.Controllers
                 SecurityStamp = Guid.NewGuid().ToString(),
                 UserName = model.Email
             };
+
+            User userProfile = new()
+            {
+                UserId = user.Id,
+                Name = model.Name,
+                Email = model.Email
+            };
             var result = await _userManager.CreateAsync(user, model.Password);
 
             if (!await _roleManager.RoleExistsAsync(ApplicationUserRoles.User))
@@ -102,6 +111,9 @@ namespace MapOfActivitiesAPI.Controllers
             if (!result.Succeeded)
                 return StatusCode(StatusCodes.Status500InternalServerError, new ResponseModel { Status = "Error", Message = "User creation failed! Please check user details and try again." });
             else {
+                _context.Users.Add(userProfile);
+                await _context.SaveChangesAsync();
+
                 var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
                 var callbackUrl = $"http://localhost:9000/#/start-menu?userId={user.Id}&code={code}";
                 EmailService emailService = new EmailService();
@@ -125,7 +137,15 @@ namespace MapOfActivitiesAPI.Controllers
                 SecurityStamp = Guid.NewGuid().ToString(),
                 UserName = model.Email
             };
+
+            User userProfile = new()
+            {
+                UserId = user.Id,
+                Name = model.Name,
+                Email = model.Email
+            };
             var result = await _userManager.CreateAsync(user, model.Password);
+         
 
             if (!result.Succeeded)
                 return StatusCode(StatusCodes.Status500InternalServerError, new ResponseModel { Status = "Error", Message = "User creation failed! Please check user details and try again." });
@@ -137,6 +157,10 @@ namespace MapOfActivitiesAPI.Controllers
             {
                 await _userManager.AddToRoleAsync(user, ApplicationUserRoles.Admin);
             }
+
+            _context.Users.Add(userProfile);
+            await _context.SaveChangesAsync();
+
             return Ok(new ResponseModel { Status = "Success", Message = "User created successfully!" });
         }
 
