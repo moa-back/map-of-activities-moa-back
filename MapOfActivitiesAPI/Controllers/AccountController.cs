@@ -103,11 +103,7 @@ namespace MapOfActivitiesAPI.Controllers
                 return StatusCode(StatusCodes.Status500InternalServerError, new ResponseModel { Status = "Error", Message = "User creation failed! Please check user details and try again." });
             else {
                 var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-                var callbackUrl = Url.Action(
-                    "ConfirmEmail",
-                    "Account",
-                    new { userId = user.Id, code = code },
-                    protocol: HttpContext.Request.Scheme);
+                var callbackUrl = $"http://localhost:9000/#/start-menu?userId={user.Id}&code={code}";
                 EmailService emailService = new EmailService();
                 await emailService.SendEmailAsync(model.Email, "Confirm your account", "Ваш обліковий запис майже готовий!", callbackUrl);
             }
