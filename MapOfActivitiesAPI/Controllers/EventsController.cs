@@ -177,7 +177,7 @@ namespace MapOfActivitiesAPI.Controllers
 
         //    return NoContent();
         //}
-
+        [Authorize(Roles = ApplicationUserRoles.User)]
         [HttpPut("{id}")]
         public async Task<IActionResult> PutEvent(int id, EventView viewEvent)
         {
@@ -219,7 +219,7 @@ namespace MapOfActivitiesAPI.Controllers
 
             return NoContent();
         }
-
+        [Authorize(Roles = ApplicationUserRoles.User)]
         [HttpPost]
             public async Task<ActionResult<Event>> PostEvent(EventView viewEvent)
             {
@@ -248,7 +248,7 @@ namespace MapOfActivitiesAPI.Controllers
         //{
         //    return await _fileStorage.Get(fileName); 
         //}
-
+        [Authorize(Roles = ApplicationUserRoles.User)]
         [HttpDelete("{id}")]
             public async Task<IActionResult> DeleteEvent(int id)
             {
