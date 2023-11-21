@@ -1,5 +1,6 @@
 ﻿using MapOfActivitiesAPI.Interfaces;
 using MapOfActivitiesAPI.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -24,6 +25,7 @@ namespace MapOfActivitiesAPI.Controllers
         .Where(e => e.EventId == eventId)
         .Select(u => u.UserId)
         .ToList();
+
             var users = new List<User>();
             foreach (var userId in eventsUsers)
             {
@@ -37,7 +39,18 @@ namespace MapOfActivitiesAPI.Controllers
             return users;
         }
 
+        [HttpGet]
+        [Route("is-joiner")]
+        public async Task<ActionResult<Boolean>> IsJoiner(string userId, int eventId)
+        {
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.UserId == userId);
+            var visit = await _context.Visitings.Where(v => v.UserId == user.Id && v.EventId == eventId).FirstOrDefaultAsync();
+            return Ok(visit != null);
+        }
+
         [HttpPost]
+        [Route("add-visiting")]
+        [AllowAnonymous]
         public async Task<ActionResult<User>> CreateVisiting(string userId, int eventId)
         {
             var user = await _context.Users.FirstOrDefaultAsync(u => u.UserId == userId);
@@ -51,6 +64,8 @@ namespace MapOfActivitiesAPI.Controllers
         }
 
         [HttpDelete]
+        [Route("delete-visiting")]
+        [AllowAnonymous]
         public async Task<IActionResult> DeleteVisiting(string userId, int eventId)
         {
             if (_context.Visitings == null)
