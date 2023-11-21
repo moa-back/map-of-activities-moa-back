@@ -78,6 +78,36 @@ namespace MapOfActivitiesAPI.Controllers
             }
             return BadRequest("Invalid email or password");
         }
+
+        [HttpPost]
+        [Route("userid-from-token")]
+        public async Task<ActionResult<User>> UserIdFromToken(TokenModel tokenModel)
+        {
+            if (tokenModel is null)
+                return BadRequest("Invalid client request");
+
+            string accessToken = tokenModel.AccessToken;
+            string refreshToken = tokenModel.RefreshToken;
+
+            var principal = _tokenService.GetPrincipalFromExpiredToken(accessToken);
+
+
+            string email = principal.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
+
+            //string userId = principal.Claims.FirstOrDefault(c => c.Type == ClaimTypes.UserData)?.Value;
+
+
+            if (string.IsNullOrEmpty(email))
+                return BadRequest("Invalid email in the token");
+
+            var user = await _context.Users.FirstOrDefaultAsync(c => c.Email == email);
+
+            //if (user is null || user.RefreshToken != refreshToken || user.RefreshTokenExpiryTime <= DateTime.Now)
+            //  return BadRequest("Invalid access token or refresh token");
+
+            return user;
+        }
+
         [HttpPost]
         [Route("register")]
         public async Task<IActionResult> Register([FromBody] RegisterModel model)

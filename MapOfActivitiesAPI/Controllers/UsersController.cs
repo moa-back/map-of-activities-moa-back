@@ -97,6 +97,34 @@ public class UsersController : ControllerBase
         return Ok(new { Message = "User banned successfully." });
     }
 
+    [HttpPost]
+    [Route("unban/{userId}")]
+    public async Task<IActionResult> Unban(string userId)
+    {
+        var user = await _userManager.FindByIdAsync(userId);
+
+        if (user == null)
+        {
+            return NotFound();
+        }
+
+        if (!await _roleManager.RoleExistsAsync(ApplicationUserRoles.User))
+        {
+            await _roleManager.CreateAsync(new IdentityRole(ApplicationUserRoles.User));
+        }
+
+        var userRoles = await _userManager.GetRolesAsync(user);
+
+        foreach (var role in userRoles)
+        {
+            await _userManager.RemoveFromRoleAsync(user, role);
+        }
+
+        await _userManager.AddToRoleAsync(user, ApplicationUserRoles.User);
+
+        return Ok(new { Message = "User unbanned successfully." });
+    }
+
     [HttpDelete]
     [Route("{userId}")]
     public async Task<IActionResult> DeleteUser(string userId)
