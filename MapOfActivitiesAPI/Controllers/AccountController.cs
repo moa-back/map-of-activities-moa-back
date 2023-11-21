@@ -78,6 +78,36 @@ namespace MapOfActivitiesAPI.Controllers
             }
             return BadRequest("Invalid email or password");
         }
+
+        [HttpPost]
+        [Route("userid-from-token")]
+        public async Task<ActionResult<User>> UserIdFromToken(TokenModel tokenModel)
+        {
+            if (tokenModel is null)
+                return BadRequest("Invalid client request");
+
+            string accessToken = tokenModel.AccessToken;
+            string refreshToken = tokenModel.RefreshToken;
+
+            var principal = _tokenService.GetPrincipalFromExpiredToken(accessToken);
+
+
+            string email = principal.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
+
+            //string userId = principal.Claims.FirstOrDefault(c => c.Type == ClaimTypes.UserData)?.Value;
+
+
+            if (string.IsNullOrEmpty(email))
+                return BadRequest("Invalid email in the token");
+
+            var user = await _context.Users.FirstOrDefaultAsync(c => c.Email == email);
+
+            //if (user is null || user.RefreshToken != refreshToken || user.RefreshTokenExpiryTime <= DateTime.Now)
+            //  return BadRequest("Invalid access token or refresh token");
+
+            return user;
+        }
+
         [HttpPost]
         [Route("register")]
         public async Task<IActionResult> Register([FromBody] RegisterModel model)
@@ -101,16 +131,10 @@ namespace MapOfActivitiesAPI.Controllers
             };
             var result = await _userManager.CreateAsync(user, model.Password);
 
-            if (!await _roleManager.RoleExistsAsync(ApplicationUserRoles.User))
-                await _roleManager.CreateAsync(new IdentityRole(ApplicationUserRoles.User));
-
-            if (await _roleManager.RoleExistsAsync(ApplicationUserRoles.User))
-            {
-                await _userManager.AddToRoleAsync(user, ApplicationUserRoles.User);
-            }
             if (!result.Succeeded)
                 return StatusCode(StatusCodes.Status500InternalServerError, new ResponseModel { Status = "Error", Message = "User creation failed! Please check user details and try again." });
-            else {
+            else
+            {
                 _context.Users.Add(userProfile);
                 await _context.SaveChangesAsync();
 
@@ -122,6 +146,7 @@ namespace MapOfActivitiesAPI.Controllers
 
             return Ok(new ResponseModel { Status = "Success", Message = "User created successfully!" });
         }
+
 
         [HttpPost]
         [Route("register-admin")]
@@ -180,6 +205,14 @@ namespace MapOfActivitiesAPI.Controllers
             var result = await _userManager.ConfirmEmailAsync(user, code);
             if (result.Succeeded)
             {
+                if (!await _roleManager.RoleExistsAsync(ApplicationUserRoles.User))
+                    await _roleManager.CreateAsync(new IdentityRole(ApplicationUserRoles.User));
+
+                if (await _roleManager.RoleExistsAsync(ApplicationUserRoles.User))
+                {
+                    await _userManager.AddToRoleAsync(user, ApplicationUserRoles.User);
+                }
+
                 return Ok();
             }
             else
