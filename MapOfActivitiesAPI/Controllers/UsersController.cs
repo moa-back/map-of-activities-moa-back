@@ -8,7 +8,6 @@ using System.Linq;
 using Microsoft.EntityFrameworkCore;
 using MapOfActivitiesAPI.Interfaces;
 
-[Authorize(Roles = ApplicationUserRoles.Admin)]
 [Route("api/[controller]")]
 [ApiController]
 public class UsersController : ControllerBase
@@ -73,6 +72,7 @@ public class UsersController : ControllerBase
 
     [HttpPost]
     [Route("ban/{userId}")]
+    [Authorize(Roles = ApplicationUserRoles.Admin)]
     public async Task<IActionResult> Ban(string userId)
     {
         var user = await _userManager.FindByIdAsync(userId);
@@ -100,6 +100,7 @@ public class UsersController : ControllerBase
 
     [HttpPost]
     [Route("unban/{userId}")]
+    [Authorize(Roles = ApplicationUserRoles.Admin)]
     public async Task<IActionResult> Unban(string userId)
     {
         var user = await _userManager.FindByIdAsync(userId);
@@ -128,6 +129,7 @@ public class UsersController : ControllerBase
 
     [HttpDelete]
     [Route("{userId}")]
+    [Authorize(Roles = ApplicationUserRoles.Admin)]
     public async Task<IActionResult> DeleteUser(string userId)
     {
         var user = await _userManager.FindByIdAsync(userId);
