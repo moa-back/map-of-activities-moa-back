@@ -50,22 +50,25 @@ namespace MapOfActivitiesAPI.Controllers
 
         [HttpPost]
         [Route("add-visiting")]
-        [AllowAnonymous]
+
         public async Task<ActionResult<User>> CreateVisiting(string userId, int eventId)
         {
             var user = await _context.Users.FirstOrDefaultAsync(u => u.UserId == userId);
-            Visitings visit = new Visitings();
-            visit.UserId = user.Id;
-            visit.EventId = eventId;
-            _context.Visitings.Add(visit);
-            await _context.SaveChangesAsync();
+            var visits = await _context.Visitings.Where(v => v.UserId == user.Id && v.EventId == eventId).FirstOrDefaultAsync();
+            if (visits==null)
+            {
+                Visitings visit = new Visitings();
+                visit.UserId = user.Id;
+                visit.EventId = eventId;
+                _context.Visitings.Add(visit);
+                await _context.SaveChangesAsync();
+            }
 
             return NoContent();
         }
 
-        [HttpDelete]
+        [HttpPost]
         [Route("delete-visiting")]
-        [AllowAnonymous]
         public async Task<IActionResult> DeleteVisiting(string userId, int eventId)
         {
             if (_context.Visitings == null)
