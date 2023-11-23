@@ -8,5 +8,7 @@
         public string Name { get; set; }
         public string? Description { get; set; }
         public string? ImageURL { get; set; }
+
+        public List<Event> CreatedEvents { get; set; }
     }
 }
