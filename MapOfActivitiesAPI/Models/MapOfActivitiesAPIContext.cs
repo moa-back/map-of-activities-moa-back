@@ -28,6 +28,13 @@ namespace MapOfActivitiesAPI.Models
                 .HasForeignKey(e => e.TypeId)
                 .OnDelete(DeleteBehavior.Cascade);
             });
+            builder.Entity<Event>(entity =>
+            {
+                entity.HasOne(e => e.User)
+                .WithMany(e => e.CreatedEvents)
+                .HasForeignKey(e => e.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+            });
         }
 
         public DbSet<MapOfActivitiesAPI.Models.EventView>? EventView { get; set; }

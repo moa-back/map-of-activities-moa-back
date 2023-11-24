@@ -1,5 +1,6 @@
 ﻿using MapOfActivitiesAPI.Interfaces;
 using MapOfActivitiesAPI.Models;
+using MapOfActivitiesAPI.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -7,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Data;
 using System.Drawing;
 using System.Globalization;
+using System.Security.Claims;
 
 namespace MapOfActivitiesAPI.Controllers
 {
@@ -16,10 +18,13 @@ namespace MapOfActivitiesAPI.Controllers
     {
         private readonly IFileStorage _fileStorage;
         private MapOfActivitiesAPIContext _context;
-        public EventsController(IFileStorage fileStorage, MapOfActivitiesAPIContext context)
+        private readonly ITokenService _tokenService;
+
+        public EventsController(IFileStorage fileStorage, MapOfActivitiesAPIContext context, ITokenService tokenService)
         {
             _fileStorage = fileStorage;
             _context = context;
+            _tokenService = tokenService;
         }
      //   [Authorize(Roles = ApplicationUserRoles.User)]
         [HttpGet]
@@ -237,7 +242,15 @@ namespace MapOfActivitiesAPI.Controllers
                 myEvent.Description = viewEvent.Description;
                 myEvent.Coordinates = viewEvent.Coordinates;
 
-                _context.Events.Add(myEvent);
+    
+            var token = await Microsoft.AspNetCore.Authentication.AuthenticationHttpContextExtensions.GetTokenAsync(HttpContext, "access_token");
+            Console.WriteLine( "token is " + token);
+            var principal = _tokenService.GetPrincipalFromExpiredToken(token);
+            string email = principal.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
+            var user = await _context.Users.FirstOrDefaultAsync(c => c.Email == email);
+            myEvent.User = user;
+                
+            _context.Events.Add(myEvent);
                 await _context.SaveChangesAsync();
 
                 return NoContent();
