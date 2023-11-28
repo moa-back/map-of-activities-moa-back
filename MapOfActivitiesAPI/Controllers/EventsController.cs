@@ -73,6 +73,22 @@ namespace MapOfActivitiesAPI.Controllers
             return userEvents;
         }
 
+        [HttpGet]
+        [Route("author-events/{userId}")]
+        public async Task<ActionResult<IEnumerable<Event>>> GetAuthorEvents(int userId)
+        {
+            if (_context.Events == null)
+            {
+                return NotFound();
+            }
+
+            // Отримання подій за userId
+            var userEvents = await _context.Events
+                .Where(x => x.UserId == userId).ToListAsync(); // Фільтрація за userId
+           
+            return userEvents;
+        }
+
         //[HttpGet("{filter}")]
         //public IEnumerable<Event> GetEventsByFilter(string filter)
         //{
