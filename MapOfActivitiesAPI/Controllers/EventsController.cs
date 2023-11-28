@@ -40,8 +40,7 @@ namespace MapOfActivitiesAPI.Controllers
             {
                 return NotFound();
             }
-            var confectioner = _context.Events.Include(x => x.Type).Where(x => x.Id == id).FirstOrDefault();
-
+            var confectioner = _context.Events.Include(x => x.Type).Include(x => x.User).Where(x => x.Id == id).FirstOrDefault();
             if (confectioner == null)
             {
                 return NotFound();
