@@ -121,7 +121,8 @@ namespace MapOfActivitiesAPI.Controllers
                     Math.Cos(lat1Rad) * Math.Cos(lat2Rad) *
                     Math.Sin(dLon / 2) * Math.Sin(dLon / 2);
             var c = 2 * Math.Atan2(Math.Sqrt(a), Math.Sqrt(1 - a));
-            var distance = EarthRadius * c; 
+            var distance = EarthRadius * c;
+            distance *= 1000;
             return distance;
         }
 
