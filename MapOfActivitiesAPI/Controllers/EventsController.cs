@@ -40,14 +40,52 @@ namespace MapOfActivitiesAPI.Controllers
             {
                 return NotFound();
             }
-            var confectioner = _context.Events.Include(x => x.Type).Where(x => x.Id == id).FirstOrDefault();
-
+            var confectioner = _context.Events.Include(x => x.Type).Include(x => x.User).Where(x => x.Id == id).FirstOrDefault();
             if (confectioner == null)
             {
                 return NotFound();
             }
 
             return confectioner;
+        }
+
+        [HttpGet]
+        [Route("user-events/{userId}")]
+        public async Task<ActionResult<IEnumerable<Event>>> GetUserEvents(int userId)
+        {
+            if (_context.Events == null)
+            {
+                return NotFound();
+            }
+            // Отримання списку EventId з відвідувань користувача
+            var userVisitingsEventIds = await _context.Visitings
+                .Where(x => x.UserId == userId)
+                .Select(v => v.EventId) // Вибірка EventId з відвідувань
+                .ToListAsync();
+
+            // Отримання подій, EventId яких входять у список userVisitingsEventIds
+            var userEvents = await _context.Events
+                .Where(x => userVisitingsEventIds.Contains(x.Id)) // Фільтрація за EventId
+                .ToListAsync();
+
+
+            return userEvents;
+        }
+
+        [HttpGet]
+        [Route("author-events/{userId}")]
+        public async Task<ActionResult<IEnumerable<Event>>> GetAuthorEvents(int userId)
+        {
+            if (_context.Events == null)
+            {
+                return NotFound();
+            }
+
+            // Отримання подій за userId
+            var userEvents = await _context.Events
+                .Where(x => x.UserId == userId).ToListAsync(); // Фільтрація за userId
+           
+            return userEvents;
         }
 
         //[HttpGet("{filter}")]
