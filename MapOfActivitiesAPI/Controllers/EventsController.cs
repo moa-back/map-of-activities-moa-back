@@ -26,7 +26,7 @@ namespace MapOfActivitiesAPI.Controllers
             _context = context;
             _tokenService = tokenService;
         }
-     //   [Authorize(Roles = ApplicationUserRoles.User)]
+        //   [Authorize(Roles = ApplicationUserRoles.User)]
         [HttpGet]
         public IEnumerable<Event> Get()
         {
@@ -84,7 +84,7 @@ namespace MapOfActivitiesAPI.Controllers
             // Отримання подій за userId
             var userEvents = await _context.Events
                 .Where(x => x.UserId == userId).ToListAsync(); // Фільтрація за userId
-           
+
             return userEvents;
         }
 
@@ -129,18 +129,13 @@ namespace MapOfActivitiesAPI.Controllers
                 points = points.Where(p => types.Contains(p.TypeId));
             }
 
-            if (endTime.HasValue)
-            {
-                points = points.Where(p => p.StartTime <= endTime.Value);
-            }
 
-            if (startTime.HasValue)
-            {
-                points = points.Where(p => p.EndTime >= startTime.Value);
-            }
+            points = points.Where(p => !p.StartTime.HasValue || !endTime.HasValue || p.StartTime <= endTime.Value);
 
-                return (IEnumerable<Event>)points.ToList();
-            }
+            points = points.Where(p => !p.EndTime.HasValue || !startTime.HasValue || p.EndTime >= startTime.Value);
+
+            return (IEnumerable<Event>)points.ToList();
+        }
         private double CalculateDistance(string coordinates1, string coordinates2)
         {
             var (lat1, lon1) = ParseCoordinates(coordinates1);
