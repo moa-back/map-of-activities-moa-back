@@ -148,46 +148,46 @@ namespace MapOfActivitiesAPI.Controllers
         }
 
 
-        [HttpPost]
-        [Route("register-admin")]
-        public async Task<IActionResult> RegisterAdmin([FromBody] RegisterModel model)
-        {
-            var userExists = await _userManager.FindByEmailAsync(model.Email);
-            if (userExists != null)
-                return StatusCode(StatusCodes.Status500InternalServerError, new ResponseModel { Status = "Error", Message = "User already exists!" });
+        //[HttpPost]
+        //[Route("register-admin")]
+        //public async Task<IActionResult> RegisterAdmin([FromBody] RegisterModel model)
+        //{
+        //    var userExists = await _userManager.FindByEmailAsync(model.Email);
+        //    if (userExists != null)
+        //        return StatusCode(StatusCodes.Status500InternalServerError, new ResponseModel { Status = "Error", Message = "User already exists!" });
 
-            ApplicationUser user = new()
-            {
-                Email = model.Email,
-                SecurityStamp = Guid.NewGuid().ToString(),
-                UserName = model.Email
-            };
+        //    ApplicationUser user = new()
+        //    {
+        //        Email = model.Email,
+        //        SecurityStamp = Guid.NewGuid().ToString(),
+        //        UserName = model.Email
+        //    };
 
-            User userProfile = new()
-            {
-                UserId = user.Id,
-                Name = model.Name,
-                Email = model.Email
-            };
-            var result = await _userManager.CreateAsync(user, model.Password);
+        //    User userProfile = new()
+        //    {
+        //        UserId = user.Id,
+        //        Name = model.Name,
+        //        Email = model.Email
+        //    };
+        //    var result = await _userManager.CreateAsync(user, model.Password);
          
 
-            if (!result.Succeeded)
-                return StatusCode(StatusCodes.Status500InternalServerError, new ResponseModel { Status = "Error", Message = "User creation failed! Please check user details and try again." });
+        //    if (!result.Succeeded)
+        //        return StatusCode(StatusCodes.Status500InternalServerError, new ResponseModel { Status = "Error", Message = "User creation failed! Please check user details and try again." });
 
-            if (!await _roleManager.RoleExistsAsync(ApplicationUserRoles.Admin))
-                await _roleManager.CreateAsync(new IdentityRole(ApplicationUserRoles.Admin));
+        //    if (!await _roleManager.RoleExistsAsync(ApplicationUserRoles.Admin))
+        //        await _roleManager.CreateAsync(new IdentityRole(ApplicationUserRoles.Admin));
 
-            if (await _roleManager.RoleExistsAsync(ApplicationUserRoles.Admin))
-            {
-                await _userManager.AddToRoleAsync(user, ApplicationUserRoles.Admin);
-            }
+        //    if (await _roleManager.RoleExistsAsync(ApplicationUserRoles.Admin))
+        //    {
+        //        await _userManager.AddToRoleAsync(user, ApplicationUserRoles.Admin);
+        //    }
 
-            _context.Users.Add(userProfile);
-            await _context.SaveChangesAsync();
+        //    _context.Users.Add(userProfile);
+        //    await _context.SaveChangesAsync();
 
-            return Ok(new ResponseModel { Status = "Success", Message = "User created successfully!" });
-        }
+        //    return Ok(new ResponseModel { Status = "Success", Message = "User created successfully!" });
+        //}
 
         [HttpGet("confirm-email")]
         [AllowAnonymous]
