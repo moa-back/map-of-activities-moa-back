@@ -94,18 +94,21 @@ namespace MapOfActivitiesAPI.Controllers
 
             string email = principal.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
 
-            //string userId = principal.Claims.FirstOrDefault(c => c.Type == ClaimTypes.UserData)?.Value;
-
+            string role = principal.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role)?.Value;
 
             if (string.IsNullOrEmpty(email))
                 return BadRequest("Invalid email in the token");
 
-            var user = await _context.Users.FirstOrDefaultAsync(c => c.Email == email);
+            var _user = await _context.Users.FirstOrDefaultAsync(c => c.Email == email);
 
-            //if (user is null || user.RefreshToken != refreshToken || user.RefreshTokenExpiryTime <= DateTime.Now)
-            //  return BadRequest("Invalid access token or refresh token");
+            var userData = new
+            {
+                user = _user,
+                Roles = role
+            };
 
-            return user;
+            return Ok(userData);
+
         }
 
         [HttpPost]
