@@ -124,10 +124,15 @@ namespace MapOfActivitiesAPI.Controllers
             {
                 Id = p.Id,
                 Name = p.Name,
-                TypeId = p.Type.Id,
-                TypeIcon = p.Type.ImageURL,
-                TypeName = p.Type.Name,
-                Coordinates = p.Coordinates
+                Type = new TypeDTO
+                {
+                    TypeId = p.Type.Id,
+                    TypeIcon = p.Type.ImageURL,
+                    TypeName = p.Type.Name,
+                },
+                Coordinates = p.Coordinates,
+                StartTime = p.StartTime,
+                EndTime = p.EndTime
             });
 
             return simpleEvents.ToList();
