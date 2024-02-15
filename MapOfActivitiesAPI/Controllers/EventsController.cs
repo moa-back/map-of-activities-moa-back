@@ -1,5 +1,6 @@
 ﻿using MapOfActivitiesAPI.Interfaces;
 using MapOfActivitiesAPI.Models;
+using MapOfActivitiesAPI.ModelsDTO;
 using MapOfActivitiesAPI.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -88,23 +89,8 @@ namespace MapOfActivitiesAPI.Controllers
             return userEvents;
         }
 
-        //[HttpGet("{filter}")]
-        //public IEnumerable<Event> GetEventsByFilter(string filter)
-        //{
-        //    var filterType = _context.Types.Where(x => x.Name == filter).Select(x=>x.Id).FirstOrDefault();
-        //    var points = _context.Events.AsQueryable();
-
-        //    if (!string.IsNullOrEmpty(filter))
-        //    {
-        //        points = points.Where(p => p.TypeId == filterType);
-        //    }
-
-        //    return (IEnumerable<Event>)points.ToList();
-        //}
-
-
         [HttpGet("filter")]
-        public IEnumerable<Event> GetEventsByFilter([FromQuery] string? searchName = null,
+        public IEnumerable<EventDTO> GetEventsByFilter([FromQuery] string? searchName = null,
             [FromQuery] string? userPoint = null,
             [FromQuery] double? distance = null,
             [FromQuery] List<int>? types = null,
@@ -134,7 +120,18 @@ namespace MapOfActivitiesAPI.Controllers
 
             points = points.Where(p => !p.EndTime.HasValue || !startTime.HasValue || p.EndTime >= startTime.Value);
 
-            return (IEnumerable<Event>)points.ToList();
+            var simpleEvents = points.Select(p => new EventDTO
+            {
+                Id = p.Id,
+                Name = p.Name,
+                TypeId = p.Type.Id,
+                TypeIcon = p.Type.ImageURL,
+                TypeName = p.Type.Name,
+                Coordinates = p.Coordinates
+            });
+
+            return simpleEvents.ToList();
+            
         }
         private double CalculateDistance(string coordinates1, string coordinates2)
         {
