@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using MapOfActivitiesAPI.Models;
+using System.Reflection.Emit;
 
 namespace MapOfActivitiesAPI.Models
 {
@@ -11,6 +12,8 @@ namespace MapOfActivitiesAPI.Models
         public DbSet<Visitings> Visitings { get; set; }
         public DbSet<Comment> Comments { get; set; }
         public DbSet<User> Users { get; set; }
+
+        public DbSet<Complaint> Complaints { get; set; }
 
         public MapOfActivitiesAPIContext(DbContextOptions<MapOfActivitiesAPIContext> options)
             : base(options)

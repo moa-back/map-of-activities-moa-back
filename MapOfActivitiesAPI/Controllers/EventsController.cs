@@ -215,7 +215,8 @@ namespace MapOfActivitiesAPI.Controllers
 
         //    return NoContent();
         //}
-        [Authorize(Roles = ApplicationUserRoles.User)]
+        [Authorize(Roles = ApplicationUserRoles.User + "," + ApplicationUserRoles.Admin)]
+        //[Authorize(Roles = ApplicationUserRoles.Admin)]
         [HttpPut("{id}")]
         public async Task<IActionResult> PutEvent(int id, EventView viewEvent)
         {
@@ -257,7 +258,7 @@ namespace MapOfActivitiesAPI.Controllers
 
             return NoContent();
         }
-        [Authorize(Roles = ApplicationUserRoles.User)]
+        [Authorize(Roles = ApplicationUserRoles.User + "," + ApplicationUserRoles.Admin)]
         [HttpPost]
             public async Task<ActionResult<Event>> PostEvent(EventView viewEvent)
             {
@@ -294,7 +295,7 @@ namespace MapOfActivitiesAPI.Controllers
         //{
         //    return await _fileStorage.Get(fileName); 
         //}
-        [Authorize(Roles = ApplicationUserRoles.User)]
+        [Authorize(Roles = ApplicationUserRoles.User + "," + ApplicationUserRoles.Admin)]
         [HttpDelete("{id}")]
             public async Task<IActionResult> DeleteEvent(int id)
             {
