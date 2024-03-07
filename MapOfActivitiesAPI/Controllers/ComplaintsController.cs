@@ -136,8 +136,8 @@ namespace MapOfActivitiesAPI.Controllers
 
         //[Authorize(Roles = ApplicationUserRoles.Admin)]
         [HttpPost]
-        [Route("user-complaint")]
-        public async Task<ActionResult<Complaint>> PostComplaintUser(string header, string description, string userId, string userIdAuthor)
+        [HttpPost("user-complaint/{userId}/{authorId}")]
+        public async Task<ActionResult<Complaint>> PostComplaintUser(string userId, string authorId, Complaint c)
         {
 
             var toUser = await _context.Users.FirstOrDefaultAsync(e => e.UserId == userId);
@@ -147,7 +147,7 @@ namespace MapOfActivitiesAPI.Controllers
                 return NotFound();
             }
 
-            var fromUser = await _context.Users.FirstOrDefaultAsync(e => e.UserId == userIdAuthor);
+            var fromUser = await _context.Users.FirstOrDefaultAsync(e => e.UserId == authorId);
 
             if (fromUser == null)
             {
@@ -155,8 +155,8 @@ namespace MapOfActivitiesAPI.Controllers
             }
 
             Complaint myUserComplaint = new Complaint();
-            myUserComplaint.Header = header;
-            myUserComplaint.Description = description;
+            myUserComplaint.Header = c.Header;
+            myUserComplaint.Description = c.Description;
             myUserComplaint.UserId = toUser.Id;
             myUserComplaint.AuthorId = fromUser.Id;
 
