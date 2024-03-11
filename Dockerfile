@@ -1,11 +1,11 @@
 FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
-WORKDIR /moa-back/map-of-activities-moa-back/MapOfActivitiesAPI
+WORKDIR /src
 
-
-COPY /moa-back/map-of-activities-moa-back/MapOfActivitiesAPI/*.csproj ./
+# Assuming your project files are in a subdirectory named 'MapOfActivitiesAPI'
+COPY MapOfActivitiesAPI/*.csproj ./
 RUN dotnet restore
 
-COPY /moa-back/map-of-activities-moa-back/MapOfActivitiesAPI/ .          
+COPY MapOfActivitiesAPI/ .          
 RUN dotnet build -c Release -o /app/build
 
 COPY Directory.Build.props .
@@ -17,4 +17,3 @@ FROM mcr.microsoft.com/dotnet/aspnet:6.0 AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
 ENTRYPOINT ["dotnet", "MapOfActivitiesAPI.dll"]
-
