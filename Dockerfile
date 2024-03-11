@@ -5,7 +5,7 @@ RUN rpm -Uvh https://packages.microsoft.com/config/centos/7/packages-microsoft-p
     && yum install -y aspnetcore-runtime-6.0
 
 # Ensure we listen on any IP Address 
-ENV DOTNET_URLS=http://+:30001
+ENV DOTNET_URLS=http://+:44333
 
 WORKDIR /app
 
