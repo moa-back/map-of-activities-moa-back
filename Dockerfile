@@ -7,11 +7,13 @@ ENV DOTNET_WATCH_RESTART_ON_RUDE_EDIT=true
 
 FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
 WORKDIR /src
-COPY *.csproj ./
 
-RUN dotnet restore "MapOfActivitiesAPI.csproj"
-COPY . /src
-RUN dotnet build "MapOfActivitiesAPI.csproj" -c Release -o /app/build
+COPY src/*.csproj ./
+RUN dotnet restore "src/MapOfActivitiesAPI.csproj"
+
+COPY . .
+RUN dotnet build "src/MapOfActivitiesAPI.csproj" -c Release -o /app/build
+
 
 COPY Directory.Build.props .
 
