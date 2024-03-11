@@ -1,10 +1,11 @@
 FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
 WORKDIR /src
 
-COPY src/*.csproj ./
+# Assuming your project files are in a subdirectory named 'src'
+COPY /moa-back/map-of-activities-moa-back/MapOfActivitiesAPI/*.csproj ./
 RUN dotnet restore
 
-COPY src/ .
+COPY /moa-back/map-of-activities-moa-back/MapOfActivitiesAPI/ .             # Make sure 'src' directory exists in your Docker context
 RUN dotnet build -c Release -o /app/build
 
 COPY Directory.Build.props .
@@ -16,3 +17,4 @@ FROM mcr.microsoft.com/dotnet/aspnet:6.0 AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
 ENTRYPOINT ["dotnet", "MapOfActivitiesAPI.dll"]
+
