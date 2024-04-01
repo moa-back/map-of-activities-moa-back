@@ -3,6 +3,7 @@ using System;
 using MapOfActivitiesAPI.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace MapOfActivitiesAPI.Migrations
 {
     [DbContext(typeof(MapOfActivitiesAPIContext))]
-    partial class MapOfActivitiesAPIContextModelSnapshot : ModelSnapshot
+    [Migration("20240318192619_MessageModel")]
+    partial class MessageModel
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -79,23 +82,6 @@ namespace MapOfActivitiesAPI.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("Complaints");
-                });
-
-            modelBuilder.Entity("MapOfActivitiesAPI.Models.Connection", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("ConnectionId")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Connections");
                 });
 
             modelBuilder.Entity("MapOfActivitiesAPI.Models.Event", b =>
@@ -276,9 +262,6 @@ namespace MapOfActivitiesAPI.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<int?>("ConnectionId")
-                        .HasColumnType("integer");
-
                     b.Property<int>("EventId")
                         .HasColumnType("integer");
 
@@ -286,8 +269,6 @@ namespace MapOfActivitiesAPI.Migrations
                         .HasColumnType("integer");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("ConnectionId");
 
                     b.ToTable("Visitings");
                 });
@@ -341,18 +322,6 @@ namespace MapOfActivitiesAPI.Migrations
                     b.HasOne("MapOfActivitiesAPI.Models.Type", null)
                         .WithMany("Children")
                         .HasForeignKey("TypeId");
-                });
-
-            modelBuilder.Entity("MapOfActivitiesAPI.Models.Visitings", b =>
-                {
-                    b.HasOne("MapOfActivitiesAPI.Models.Connection", null)
-                        .WithMany("VisitingsList")
-                        .HasForeignKey("ConnectionId");
-                });
-
-            modelBuilder.Entity("MapOfActivitiesAPI.Models.Connection", b =>
-                {
-                    b.Navigation("VisitingsList");
                 });
 
             modelBuilder.Entity("MapOfActivitiesAPI.Models.Type", b =>

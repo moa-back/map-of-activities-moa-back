@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using System.Data;
 using System.Drawing;
 using System.Globalization;
@@ -20,12 +21,13 @@ namespace MapOfActivitiesAPI.Controllers
         private readonly IFileStorage _fileStorage;
         private MapOfActivitiesAPIContext _context;
         private readonly ITokenService _tokenService;
-
-        public EventsController(IFileStorage fileStorage, MapOfActivitiesAPIContext context, ITokenService tokenService)
+        private readonly INotificationHub _hubContext;
+        public EventsController(INotificationHub hubContext, IFileStorage fileStorage, MapOfActivitiesAPIContext context, ITokenService tokenService)
         {
             _fileStorage = fileStorage;
             _context = context;
             _tokenService = tokenService;
+            _hubContext = hubContext;
         }
         //   [Authorize(Roles = ApplicationUserRoles.User)]
         [HttpGet]
@@ -243,6 +245,7 @@ namespace MapOfActivitiesAPI.Controllers
             try
             {
                 await _context.SaveChangesAsync();
+                await _hubContext.SendGroupNotification(id, "подію було змінено", myEvent.Name);
             }
             catch (DbUpdateConcurrencyException)
             {
@@ -309,6 +312,7 @@ namespace MapOfActivitiesAPI.Controllers
                     return NotFound();
                 }
                 _fileStorage.Delete(myEvent.ImageName);
+                await _hubContext.SendGroupNotification(id, "подію було видалено", myEvent.Name);
                 _context.Events.Remove(myEvent);
                 await _context.SaveChangesAsync();
 

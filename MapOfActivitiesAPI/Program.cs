@@ -8,6 +8,8 @@ using System.Text;
 using MapOfActivitiesAPI.Services;
 using System.Text.Json.Serialization;
 using MapOfActivitiesAPI.Interfaces;
+using Microsoft.AspNetCore.SignalR;
+using Microsoft.Extensions.Options;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -21,8 +23,7 @@ builder.Services.AddControllers().AddJsonOptions(x =>
 builder.Services.AddSwaggerGen();
 builder.Services.AddCors(c =>
 {
-    c.AddPolicy("AllowOrigin", options => options.AllowAnyOrigin().AllowAnyMethod().
-     AllowAnyHeader());
+    c.AddPolicy("AllowOrigin", options => options.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
 });
 // For Identity
 builder.Services.AddDbContext<ApplicationIdentityDbContext>(option => option.UseNpgsql(
@@ -33,6 +34,7 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>().AddEntityFramework
     .AddDefaultTokenProviders();
 
 builder.Services.AddSingleton<IFileStorage, ServerStorage>();
+
 
 builder.Services.AddAuthentication(options =>
 {
@@ -58,11 +60,42 @@ builder.Services.AddAuthentication(options =>
         ValidIssuer = configuration["Jwt:Issuer"],
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["Jwt:Key"]))
     };
+   
+    options.Events = new JwtBearerEvents
+    {
+        OnMessageReceived = context =>
+        {
+            var accessToken = context.Request.Query["token"];
+
+            // If the request is for our hub...
+            var path = context.HttpContext.Request.Path;
+            if (!string.IsNullOrEmpty(accessToken) &&
+                (path.StartsWithSegments("/NotificationHub")))
+            {
+                // Read the token out of the query string
+                context.Token = accessToken;
+            }
+            return Task.CompletedTask;
+        }
+    };
 });
 builder.Services.AddAuthorization();
+builder.Services.AddSignalR(o =>
+{
+    o.ClientTimeoutInterval = TimeSpan.FromMinutes(30);
+    o.KeepAliveInterval = TimeSpan.FromMinutes(15);
+    o.MaximumReceiveMessageSize = 102400000;
+});
 //Dependency Injections
 builder.Services.AddTransient<ITokenService, TokenServices>();
 
+builder.Services.AddScoped<INotificationHub, NotificationHub>();
+builder.Services.AddLogging(builder =>
+{
+    builder.AddConsole(); // Логирование в консоль
+    builder.AddDebug();   // Логирование в debug output
+                          // Другие провайдеры логирования (например, файлы, база данных и т.д.)
+});
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -73,8 +106,6 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
-
-app.UseCors("AllowOrigin");
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -83,6 +114,7 @@ if (app.Environment.IsDevelopment())
         c.SwaggerEndpoint("/swagger/v1/swagger.json", "Map API V1");
         c.RoutePrefix = string.Empty; // ������������� �� ������ ���� ������ ��������� swagger ��� ������� ������ ������� �������
     });
+    app.UseDeveloperExceptionPage();
 }
 
 
@@ -94,7 +126,12 @@ app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.UseEndpoints(endpoints => endpoints.MapControllers());
+app.UseCors("AllowOrigin");
 
+app.UseEndpoints(endpoints =>
+{
+    endpoints.MapControllers();
+});
+app.MapHub<NotificationHub>("/NotificationHub");
 
 app.Run();
