@@ -14,6 +14,8 @@ namespace MapOfActivitiesAPI.Models
         public DbSet<User> Users { get; set; }
 
         public DbSet<Complaint> Complaints { get; set; }
+        public DbSet<Message> Messages { get; set; }
+        public DbSet<Connection> Connections { get; set; }
 
         public MapOfActivitiesAPIContext(DbContextOptions<MapOfActivitiesAPIContext> options)
             : base(options)

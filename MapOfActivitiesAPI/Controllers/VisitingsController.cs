@@ -1,5 +1,6 @@
 ﻿using MapOfActivitiesAPI.Interfaces;
 using MapOfActivitiesAPI.Models;
+using MapOfActivitiesAPI.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -11,9 +12,11 @@ namespace MapOfActivitiesAPI.Controllers
     [ApiController]
     public class VisitingsController : ControllerBase
     {
+        private readonly INotificationHub _hubContext;
         private MapOfActivitiesAPIContext _context;
-        public VisitingsController(MapOfActivitiesAPIContext context)
+        public VisitingsController(INotificationHub hubContext, MapOfActivitiesAPIContext context)
         {
+            _hubContext = hubContext;
             _context = context;
         }
 
@@ -51,7 +54,7 @@ namespace MapOfActivitiesAPI.Controllers
         [HttpPost]
         [Route("add-visiting")]
 
-        public async Task<ActionResult<User>> CreateVisiting(string userId, int eventId)
+        public async Task<ActionResult<User>> CreateVisiting(string userId, int eventId, string сonId)
         {
             var user = await _context.Users.FirstOrDefaultAsync(u => u.UserId == userId);
             var visits = await _context.Visitings.Where(v => v.UserId == user.Id && v.EventId == eventId).FirstOrDefaultAsync();
@@ -62,6 +65,7 @@ namespace MapOfActivitiesAPI.Controllers
                 visit.EventId = eventId;
                 _context.Visitings.Add(visit);
                 await _context.SaveChangesAsync();
+                await _hubContext.AddToGroup(visit, userId, сonId);
             }
 
             return NoContent();
@@ -81,6 +85,7 @@ namespace MapOfActivitiesAPI.Controllers
             {
                 return NotFound();
             }
+            await _hubContext.RemoveFromGroup(visit, userId);
             _context.Visitings.Remove(visit);
             await _context.SaveChangesAsync();
 
