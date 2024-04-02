@@ -1,5 +1,6 @@
 ﻿using MapOfActivitiesAPI.Models;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.EntityFrameworkCore;
 using System.Timers;
 
 namespace MapOfActivitiesAPI.Services
@@ -16,17 +17,39 @@ namespace MapOfActivitiesAPI.Services
             notificationTimer.AutoReset = true;
             notificationTimer.Start();
         }
-        private async void OnTimerElapsed(object source, ElapsedEventArgs e)
+        private void OnTimerElapsed(object source, ElapsedEventArgs e)
         {
-            var e5 = _context.Events.Where(x => x.StartTime <= DateTime.Now.AddMinutes(30) && x.StartTime >= DateTime.Now.AddMinutes(30).AddSeconds(5)).Select(x => x).FirstOrDefault();
-            var e30 = _context.Events.Where(x => x.StartTime <= DateTime.Now.AddMinutes(5) && x.StartTime >= DateTime.Now.AddMinutes(5).AddSeconds(5)).Select(x => x).FirstOrDefault();
-            if ( e5 != null)
+            var now = DateTime.Now;
+
+            try
             {
-                await SendGroupNotification(e5.Id, "5 хв до початку", e5.Name);
+                var e30 = _context.Events
+                .Where(x => x.StartTime <= now.AddMinutes(30) && x.StartTime >= now.AddMinutes(30).AddSeconds(5))
+                .Select(x => x)
+                .ToList();
+
+                var e5 = _context.Events
+                    .Where(x => x.StartTime <= now.AddMinutes(5) && x.StartTime >= now.AddMinutes(5).AddSeconds(5))
+                    .Select(x => x)
+                    .ToList();
+                if (e5 != null)
+                {
+                    foreach (var x in e5)
+                    {
+                        SendGroupNotification(x.Id, "5 хв до початку", x.Name);
+                    }
+                }
+                else if (e30 != null)
+                {
+                    foreach (var x in e30)
+                    {
+                        SendGroupNotification(x.Id, "5 хв до початку", x.Name);
+                    }
+                }
             }
-            else if (e30 != null)
+            catch (Exception ex)
             {
-                await SendGroupNotification(e30.Id, "5 хв до початку", e30.Name);
+
             }
         }
         public override async Task OnConnectedAsync()
