@@ -91,11 +91,12 @@ builder.Services.AddSignalR(o =>
 builder.Services.AddTransient<ITokenService, TokenServices>();
 
 builder.Services.AddScoped<INotificationHub, NotificationHub>();
+//builder.Services.AddHostedService<EventCleanupService>();
 builder.Services.AddLogging(builder =>
 {
-    builder.AddConsole(); // Логирование в консоль
-    builder.AddDebug();   // Логирование в debug output
-                          // Другие провайдеры логирования (например, файлы, база данных и т.д.)
+    builder.AddConsole(); 
+    builder.AddDebug();   
+                         
 });
 var app = builder.Build();
 
