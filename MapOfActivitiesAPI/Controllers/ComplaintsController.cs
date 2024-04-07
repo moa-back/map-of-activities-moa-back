@@ -18,8 +18,24 @@ namespace MapOfActivitiesAPI.Controllers
         {
             _context = context;
         }
+        /*
+        [HttpDelete]
+        [Route("delete-all-complaints")]
+        public async Task<IActionResult> DeleteAllComplaints()
+        {
+            try
+            {
+                _context.Complaints.RemoveRange(_context.Complaints);
+                await _context.SaveChangesAsync();
+                return Ok("All complaints deleted successfully.");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"An error occurred while deleting complaints: {ex.Message}");
+            }
+        }
+        */
 
-        
         [HttpGet]
         [Route("all-events-complaints")]
         public async Task<IActionResult> GetEventsComplaints()
@@ -33,12 +49,17 @@ namespace MapOfActivitiesAPI.Controllers
                 .Where(c => c.EventId != null)
                 .Select(c => new
                 {
+                    c.Id,
                     c.EventId,
                     c.Header,
                     c.Description,
-                    c.AuthorId,
+                    c.Time,
+                    c.Status,
+                    AuthorId = _context.Users.FirstOrDefault(u => u.Id == c.AuthorId) != null ? _context.Users.FirstOrDefault(u => u.Id == c.AuthorId).UserId : null,
                     AuthorEmail = _context.Users.FirstOrDefault(u => u.Id == c.AuthorId) != null ? _context.Users.FirstOrDefault(u => u.Id == c.AuthorId).Email : null,
                 })
+                .OrderBy(e => e.Status.StartsWith("Опрацьовано") || e.Status.StartsWith("Відхилено"))
+                .ThenByDescending(e => e.Time)
                 .ToListAsync();
 
             if (complaints == null)
@@ -62,10 +83,15 @@ namespace MapOfActivitiesAPI.Controllers
                     c.Id,
                     c.Header,
                     c.Description,
+                    c.Time,
+                    c.Status,
                     UserId = _context.Users.FirstOrDefault(u => u.Id == c.UserId) != null ? _context.Users.FirstOrDefault(u => u.Id == c.UserId).UserId : null,
+                    AuthorId = _context.Users.FirstOrDefault(u => u.Id == c.AuthorId) != null ? _context.Users.FirstOrDefault(u => u.Id == c.AuthorId).UserId : null,
                     UserEmail = _context.Users.FirstOrDefault(u => u.Id == c.UserId) != null ? _context.Users.FirstOrDefault(u => u.Id == c.UserId).Email : null,
                     AuthorEmail = _context.Users.FirstOrDefault(u => u.Id == c.AuthorId) != null ? _context.Users.FirstOrDefault(u => u.Id == c.AuthorId).Email : null,
                 })
+                .OrderBy(e => e.Status.StartsWith("Опрацьовано") || e.Status.StartsWith("Відхилено"))
+                .ThenByDescending(e => e.Time)
                 .ToListAsync();
 
             if (complaints == null)
@@ -154,13 +180,17 @@ namespace MapOfActivitiesAPI.Controllers
                 return NotFound();
             }
 
-            Complaint myUserComplaint = new Complaint();
-            myUserComplaint.Header = c.Header;
-            myUserComplaint.Description = c.Description;
-            myUserComplaint.UserId = toUser.Id;
-            myUserComplaint.AuthorId = fromUser.Id;
+            Complaint UserComplaint = new Complaint();
+            UserComplaint.Header = c.Header;
+            UserComplaint.Description = c.Description;
+            UserComplaint.UserId = toUser.Id;
+            UserComplaint.AuthorId = fromUser.Id;
+            UserComplaint.Status = "Очікується";
 
-            _context.Complaints.Add(myUserComplaint);
+            DateTime currentTime = DateTime.UtcNow;
+            UserComplaint.Time = currentTime;
+
+            _context.Complaints.Add(UserComplaint);
             await _context.SaveChangesAsync();
 
             return Ok();
@@ -210,13 +240,18 @@ namespace MapOfActivitiesAPI.Controllers
             //    return NotFound();
             //}
 
-            Complaint myUserComplaint = new Complaint();
-            myUserComplaint.Header = c.Header;
-            myUserComplaint.Description = c.Description;
-            myUserComplaint.EventId = _event.Id;
-            myUserComplaint.AuthorId = c.AuthorId;
+            Complaint EventComplaint = new Complaint();
+            EventComplaint.Header = c.Header;
+            EventComplaint.Description = c.Description;
+            EventComplaint.EventId = _event.Id;
+            EventComplaint.AuthorId = c.AuthorId;
 
-            _context.Complaints.Add(myUserComplaint);
+            EventComplaint.Status = "Очікується";
+
+            DateTime currentTime = DateTime.UtcNow;
+            EventComplaint.Time = currentTime;
+
+            _context.Complaints.Add(EventComplaint);
             await _context.SaveChangesAsync();
 
             return Ok();
@@ -243,6 +278,42 @@ namespace MapOfActivitiesAPI.Controllers
             _context.Complaints.Remove(complaint);
             await _context.SaveChangesAsync();
 
+            return Ok();
+        }
+
+
+        //[Authorize(Roles = ApplicationUserRoles.Admin)]
+        [HttpPut]
+        [Route("status-complaint")]
+        public async Task<ActionResult<Complaint>> PutComplainStatusEvent(Complaint c)
+        {
+
+            var _complaint = await _context.Complaints.FirstOrDefaultAsync(e => e.Id == c.Id);
+
+            if (_complaint == null)
+            {
+                return NotFound();
+            }
+
+            _complaint.Status = c.Status;
+            
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+
+            catch (DbUpdateConcurrencyException)
+            {
+                if ((_context.Complaints?.Any(e => e.Id == c.Id)).GetValueOrDefault())
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    throw;
+                }
+            }
+            
             return Ok();
         }
     }
