@@ -252,6 +252,7 @@ namespace MapOfActivitiesAPI.Controllers
             EventComplaint.Time = currentTime;
 
             _context.Complaints.Add(EventComplaint);
+
             await _context.SaveChangesAsync();
 
             return Ok();
@@ -313,7 +314,16 @@ namespace MapOfActivitiesAPI.Controllers
                     throw;
                 }
             }
-            
+
+            WebLog WebLog = new WebLog
+            {
+                Description = $"Cкарга номер {_complaint.Id}. Заголовок: {_complaint.Header}. Новий статус: {_complaint.Status}",
+                Time = DateTime.UtcNow
+            };
+
+            _context.WebLogs.Add(WebLog);
+            await _context.SaveChangesAsync();
+
             return Ok();
         }
     }

@@ -71,9 +71,9 @@ public class UsersController : ControllerBase
     }
 
     [HttpPost]
-    [Route("ban/{userId}")]
-    [Authorize(Roles = ApplicationUserRoles.Admin)]
-    public async Task<IActionResult> Ban(string userId)
+    [Route("ban/{userId}/{adminEmail}")]
+    //[Authorize(Roles = ApplicationUserRoles.Admin)]
+    public async Task<IActionResult> Ban(string userId, string adminEmail)
     {
         var user = await _userManager.FindByIdAsync(userId);
 
@@ -95,13 +95,22 @@ public class UsersController : ControllerBase
 
         await _userManager.AddToRoleAsync(user, ApplicationUserRoles.BannedUser);
 
+        WebLog WebLog = new WebLog
+        {
+            Description = $"Користувач: {user.Email} був заблокований адміністратором: {adminEmail}",
+            Time = DateTime.UtcNow
+        };
+
+        _context.WebLogs.Add(WebLog);
+        await _context.SaveChangesAsync();
+
         return Ok(new { Message = "User banned successfully." });
     }
 
     [HttpPost]
-    [Route("unban/{userId}")]
+    [Route("unban/{userId}/{adminEmail}")]
     [Authorize(Roles = ApplicationUserRoles.Admin)]
-    public async Task<IActionResult> Unban(string userId)
+    public async Task<IActionResult> Unban(string userId, string adminEmail)
     {
         var user = await _userManager.FindByIdAsync(userId);
 
@@ -124,13 +133,22 @@ public class UsersController : ControllerBase
 
         await _userManager.AddToRoleAsync(user, ApplicationUserRoles.User);
 
+        WebLog WebLog = new WebLog
+        {
+            Description = $"Користувач: {user.Email} був розблокований адміністратором: {adminEmail}",
+            Time = DateTime.UtcNow
+        };
+
+        _context.WebLogs.Add(WebLog);
+        await _context.SaveChangesAsync();
+
         return Ok(new { Message = "User unbanned successfully." });
     }
 
     [HttpDelete]
-    [Route("{userId}")]
+    [Route("{userId}/{adminEmail}")]
     [Authorize(Roles = ApplicationUserRoles.Admin)]
-    public async Task<IActionResult> DeleteUser(string userId)
+    public async Task<IActionResult> DeleteUser(string userId, string adminEmail)
     {
         var user = await _userManager.FindByIdAsync(userId);
 
@@ -151,6 +169,15 @@ public class UsersController : ControllerBase
 
         if (result.Succeeded)
         {
+            WebLog WebLog = new WebLog
+            {
+                Description = $"Акаунт користувача: {user.Email} був видалений із системи адміністратором: {adminEmail}",
+                Time = DateTime.UtcNow
+            };
+
+            _context.WebLogs.Add(WebLog);
+            await _context.SaveChangesAsync();
+
             return Ok(new { Message = "User deleted successfully." });
         }
 
