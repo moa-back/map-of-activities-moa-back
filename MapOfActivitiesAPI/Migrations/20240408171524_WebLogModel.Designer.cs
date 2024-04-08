@@ -3,6 +3,7 @@ using System;
 using MapOfActivitiesAPI.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace MapOfActivitiesAPI.Migrations
 {
     [DbContext(typeof(MapOfActivitiesAPIContext))]
-    partial class MapOfActivitiesAPIContextModelSnapshot : ModelSnapshot
+    [Migration("20240408171524_WebLogModel")]
+    partial class WebLogModel
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -249,25 +252,6 @@ namespace MapOfActivitiesAPI.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Visitings");
-                });
-
-            modelBuilder.Entity("MapOfActivitiesAPI.Models.WebLog", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Description")
-                        .HasColumnType("text");
-
-                    b.Property<DateTime?>("Time")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("WebLogs");
                 });
 
             modelBuilder.Entity("MapOfActivitiesAPI.Models.Complaint", b =>

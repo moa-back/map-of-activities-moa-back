@@ -15,6 +15,8 @@ namespace MapOfActivitiesAPI.Models
 
         public DbSet<Complaint> Complaints { get; set; }
 
+        public DbSet<WebLog> WebLogs { get; set; }
+
         public MapOfActivitiesAPIContext(DbContextOptions<MapOfActivitiesAPIContext> options)
             : base(options)
         {

@@ -18,7 +18,7 @@ namespace MapOfActivitiesAPI.Controllers
         {
             _context = context;
         }
-        /*
+        
         [HttpDelete]
         [Route("delete-all-complaints")]
         public async Task<IActionResult> DeleteAllComplaints()
@@ -34,8 +34,7 @@ namespace MapOfActivitiesAPI.Controllers
                 return StatusCode(500, $"An error occurred while deleting complaints: {ex.Message}");
             }
         }
-        */
-        // check commits
+        
 
         [HttpGet]
         [Route("all-events-complaints")]
