@@ -300,7 +300,7 @@ namespace MapOfActivitiesAPI.Controllers
         //}
         [Authorize(Roles = ApplicationUserRoles.User + "," + ApplicationUserRoles.Admin)]
         [HttpDelete("{id}")]
-            public async Task<IActionResult> DeleteEvent(int id)
+           public async Task<IActionResult> DeleteEvent(int id)
             {
                 if (_context.Events == null)
                 {
@@ -312,7 +312,10 @@ namespace MapOfActivitiesAPI.Controllers
                     return NotFound();
                 }
                 _fileStorage.Delete(myEvent.ImageName);
-                await _hubContext.SendGroupNotification(id, "подію було видалено", myEvent.Name);
+
+                 var complaintsToDelete = _context.Complaints.Where(c => c.EventId == myEvent.Id);
+                _context.Complaints.RemoveRange(complaintsToDelete);
+    
                 _context.Events.Remove(myEvent);
                 await _context.SaveChangesAsync();
 
