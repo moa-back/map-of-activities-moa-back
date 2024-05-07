@@ -18,9 +18,10 @@ namespace MapOfActivitiesAPI.Controllers
         {
             _context = context;
         }
-        
+
         [HttpDelete]
         [Route("delete-all-complaints")]
+        [Authorize(Roles = ApplicationUserRoles.Admin)]
         public async Task<IActionResult> DeleteAllComplaints()
         {
             try
@@ -34,10 +35,10 @@ namespace MapOfActivitiesAPI.Controllers
                 return StatusCode(500, $"An error occurred while deleting complaints: {ex.Message}");
             }
         }
-        
 
         [HttpGet]
         [Route("all-events-complaints")]
+        [Authorize(Roles = ApplicationUserRoles.Admin)]
         public async Task<IActionResult> GetEventsComplaints()
         {
             if (_context.Complaints == null)
@@ -70,9 +71,9 @@ namespace MapOfActivitiesAPI.Controllers
             return Ok(complaints);
         }
 
-        
         [HttpGet]
         [Route("all-users-complaints")]
+        [Authorize(Roles = ApplicationUserRoles.Admin)]
         public async Task<IActionResult> GetUsersComplaints()
         {
 
@@ -130,6 +131,7 @@ namespace MapOfActivitiesAPI.Controllers
 
         [HttpGet]
         [Route("user-complaints/{userId}")]
+        [Authorize(Roles = ApplicationUserRoles.Admin)]
         public async Task<IActionResult> GetUserComplaints(string userId)
         {
             var user = await _context.Users.FirstOrDefaultAsync(e => e.UserId == userId);
@@ -283,9 +285,9 @@ namespace MapOfActivitiesAPI.Controllers
         }
 
 
-        //[Authorize(Roles = ApplicationUserRoles.Admin)]
         [HttpPut]
         [Route("status-complaint")]
+        [Authorize(Roles = ApplicationUserRoles.Admin)]
         public async Task<ActionResult<Complaint>> PutComplainStatusEvent(Complaint c)
         {
 

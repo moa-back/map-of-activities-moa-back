@@ -17,9 +17,9 @@ namespace MapOfActivitiesAPI.Controllers
             _context = context;
         }
 
-        //[Authorize(Roles = ApplicationUserRoles.Admin)]
         [HttpGet]
         [Route("all-web-logs")]
+        [Authorize(Roles = ApplicationUserRoles.Admin)]
         public IEnumerable<WebLog> Get()
         {
             return _context.WebLogs.OrderByDescending(log => log.Time);
