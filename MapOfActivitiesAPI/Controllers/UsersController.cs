@@ -27,6 +27,7 @@ public class UsersController : ControllerBase
 
     [HttpGet]
     [Route("with-roles")]
+    [Authorize(Roles = ApplicationUserRoles.Admin)]
     public async Task<IActionResult> GetUsersWithRoles()
     {
         var users = await _userManager.Users.ToListAsync();
