@@ -72,7 +72,7 @@ public class UsersController : ControllerBase
 
     [HttpPost]
     [Route("ban/{userId}/{adminEmail}")]
-    //[Authorize(Roles = ApplicationUserRoles.Admin)]
+    [Authorize(Roles = ApplicationUserRoles.Admin)]
     public async Task<IActionResult> Ban(string userId, string adminEmail)
     {
         var user = await _userManager.FindByIdAsync(userId);
